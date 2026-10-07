@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guy Battle — Prototype</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#10131a;color:#fff;min-height:100vh}
+header{padding:18px;text-align:center;background:#171c27;border-bottom:1px solid #2a3140}h1{margin:0;font-size:28px}
+main{max-width:1000px;margin:auto;padding:18px}.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.card{background:#191f2b;border:1px solid #303849;border-radius:16px;padding:16px}.fighters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.fighter{cursor:pointer;text-align:center;transition:.15s}.fighter:hover{transform:translateY(-3px)}.fighter.selected{outline:3px solid #57e389}
+.avatar{width:78px;height:78px;border-radius:50%;margin:auto;display:grid;place-items:center;font-size:42px;background:#252d3d}
+button{border:0;border-radius:12px;padding:12px 18px;background:#57e389;color:#08110b;font-weight:800;cursor:pointer;font-size:16px}
+button:disabled{opacity:.4}.arena{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}.health{height:14px;background:#303746;border-radius:20px;overflow:hidden}.hp{height:100%;background:#57e389;width:100%;transition:.25s}
+.combatant{text-align:center}.vs{text-align:center;font-size:28px;font-weight:900;align-self:center}.log{height:150px;overflow:auto;background:#0b0e14;border-radius:12px;padding:10px;font-family:monospace;font-size:13px}
+@media(max-width:600px){.arena{grid-template-columns:1fr}.vs{order:2}.combatant:last-child{order:3}}
+</style>
+</head>
+<body>
+<header><h1>⚔️ GUY BATTLE</h1><small>Independent prototype v0.1</small></header>
+<main>
+<section class="card">
+<h2>Choose your fighter</h2>
+<div id="fighters" class="fighters"></div>
+<div style="text-align:center;margin-top:16px"><button id="start" disabled>Start Battle</button></div>
+</section>
+<section id="battle" class="card" style="display:none">
+<div class="arena">
+<div class="combatant"><div id="pAvatar" class="avatar"></div><h2 id="pName"></h2><div class="health"><div id="pHp" class="hp"></div></div><p id="pStats"></p></div>
+<div class="vs">VS</div>
+<div class="combatant"><div id="eAvatar" class="avatar"></div><h2 id="eName"></h2><div class="health"><div id="eHp" class="hp"></div></div><p id="eStats"></p></div>
+</div>
+<h3>Battle Log</h3><div id="log" class="log"></div>
+<div style="text-align:center;margin-top:12px"><button id="again">New Battle</button></div>
+</section>
+</main>
+<script>
+const fighters=[
+{name:"Boxer",emoji:"🥊",hp:120,dmg:18,speed:8},
+{name:"Wizard",emoji:"🧙",hp:85,dmg:30,speed:5},
+{name:"Knight",emoji:"🛡️",hp:160,dmg:15,speed:4},
+{name:"Ninja",emoji:"🥷",hp:95,dmg:21,speed:10},
+{name:"Robot",emoji:"🤖",hp:140,dmg:20,speed:6},
+{name:"Chef",emoji:"👨‍🍳",hp:105,dmg:24,speed:7}
+];
+let selected=null,timer=null,pHp=0,eHp=0,enemy=null;
+const $=id=>document.getElementById(id);
+fighters.forEach((f,i)=>{const d=document.createElement("div");d.className="fighter card";d.innerHTML='<div class="avatar">'+f.emoji+'</div><b>'+f.name+'</b><p>❤️ '+f.hp+'<br>⚔️ '+f.dmg+'<br>⚡ '+f.speed+'</p>';d.onclick=()=>{document.querySelectorAll(".fighter").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");selected=i;$("start").disabled=false};$("fighters").appendChild(d)});
+$("start").onclick=startBattle;$("again").onclick=()=>{clearInterval(timer);$("battle").style.display="none";$("start").disabled=selected===null};
+function startBattle(){clearInterval(timer);const p=fighters[selected];enemy=fighters[Math.floor(Math.random()*fighters.length)];if(enemy===p)enemy=fighters[(selected+1)%fighters.length];pHp=p.hp;eHp=enemy.hp;$("battle").style.display="block";$("pAvatar").textContent=p.emoji;$("pName").textContent=p.name;$("eAvatar").textContent=enemy.emoji;$("eName").textContent=enemy.name;$("pStats").textContent='⚔️ '+p.dmg+'  ⚡ '+p.speed;$("eStats").textContent='⚔️ '+enemy.dmg+'  ⚡ '+enemy.speed;$("log").innerHTML="";log("Battle started! "+p.name+" vs "+enemy.name);update();timer=setInterval(()=>{turn(p,enemy);if(eHp<=0||pHp<=0){clearInterval(timer);finish(p,enemy)}},650)}
+function turn(p,e){let playerFirst=p.speed>=e.speed;if(playerFirst){hit(p,e,true);if(eHp>0)hit(e,p,false)}else{hit(e,p,false);if(pHp>0)hit(p,e,true)}update()}
+function hit(f,e,isPlayer){let dmg=Math.max(1,f.dmg+Math.floor(Math.random()*9)-4);if(isPlayer)eHp=Math.max(0,eHp-dmg);else pHp=Math.max(0,pHp-dmg);log(f.name+" hits "+e.name+" for "+dmg+" damage!")}
+function update(){let p=fighters[selected];$("pHp").style.width=Math.max(0,pHp/p.hp*100)+"%";$("eHp").style.width=Math.max(0,eHp/enemy.hp*100)+"%"}
+function finish(p,e){const win=pHp>0;log(win?"🏆 You win!":"💀 You lose!");$("again").textContent=win?"Battle won — play again":"Try again"}
+function log(t){$("log").innerHTML+="<div>"+t+"</div>";$("log").scrollTop=$("log").scrollHeight}
+</script>
+</body></html>
