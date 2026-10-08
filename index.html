@@ -58,18 +58,13 @@ button:active{transform:scale(.98)}
     <div class="character-card">
       <div class="char-preview" id="swordPreview"></div>
       <div class="char-info"><b>⚔️ السياف</b><span>سيف • 1000 HP</span></div>
-      
-      <div class="front-choice"><button class="side-btn" id="frontSwordLeft" type="button">← أمامي</button><button class="side-btn" id="frontSwordRight" type="button">أمامي →</button></div>
     </div>
     <div class="character-card">
       <div class="char-preview" id="gunPreview"></div>
       <div class="char-info"><b>🔫 المسدد</b><span>مسدس • 1000 HP</span></div>
-      
-      <div class="front-choice"><button class="side-btn" id="frontGunLeft" type="button">← أمامي</button><button class="side-btn" id="frontGunRight" type="button">أمامي →</button></div>
     </div>
   </div>
   <button id="battleBtn" class="battle-btn" type="button">⚔️ ابدأ المعركة</button>
-  <p class="hint">اضغط على صورة الشخصية لاختيار صورة من هاتفك. اختر الاتجاه الأمامي، ثم اضغط «ابدأ المعركة».</p>
 </section>
 
 <div id="settingsModal" class="settings-modal" hidden>
@@ -106,10 +101,8 @@ const statusEl=document.getElementById("status");
 const characterPage=document.getElementById("characterPage"),battlePage=document.getElementById("battlePage");
 const battleBtn=document.getElementById("battleBtn"),backCharacters=document.getElementById("backCharacters");
 const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview");
-const frontSwordLeft=document.getElementById("frontSwordLeft"),frontSwordRight=document.getElementById("frontSwordRight");
-const frontGunLeft=document.getElementById("frontGunLeft"),frontGunRight=document.getElementById("frontGunRight");
-let swordFrontSide=localStorage.getItem("guyBattleSwordFrontSide")||"right";
-let gunFrontSide=localStorage.getItem("guyBattleGunFrontSide")||"right";
+let swordFrontSide="left";
+let gunFrontSide="left";
 let swordSize=150;
 let gunSize=150;
 let swordMaxHp=1000;
@@ -122,7 +115,7 @@ try{
 }catch(e){}
 let settingsType="sword";
 const settingsModal=document.getElementById("settingsModal"),settingsTitle=document.getElementById("settingsTitle");
-const settingsImage=document.getElementById("settingsImage"),settingsSwordImage=document.getElementById("settingsSwordImage"),settingsCharacterImageLabel=document.getElementById("settingsCharacterImageLabel"),settingsLeft=document.getElementById("settingsLeft"),settingsRight=document.getElementById("settingsRight");
+const settingsImage=document.getElementById("settingsImage");
 const settingsSize=document.getElementById("settingsSize"),settingsHp=document.getElementById("settingsHp");
 const closeSettings=document.getElementById("closeSettings"),saveSettings=document.getElementById("saveSettings");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
@@ -168,25 +161,19 @@ function chooseImage(input,type){
 }
 function openSettings(type){
   settingsType=type;
-  settingsTitle.textContent=type==="sword"?"⚔️ إعدادات السياف":"🔫 إعدادات المسدد"; settingsCharacterImageLabel.textContent=type==="sword"?"صورة السياف":"صورة المسدد"; settingsSwordImage.parentElement.style.display=type==="sword"?"flex":"none";
+  settingsTitle.textContent=type==="sword"?"⚔️ إعدادات السياف":"🔫 إعدادات المسدد"; settingsCharacterImageLabel.textContent=type==="sword"?"صورة السياف":"صورة المسدد"; settingsSwordImage.parentElement.style.display="flex";
   settingsSize.value=type==="sword"?swordSize:gunSize;
   settingsHp.value=type==="sword"?swordMaxHp:gunMaxHp;
   settingsModal.hidden=false;
 }
 settingsImage.onclick=()=>{(settingsType==="sword"?swordFile:gunFile).click()}; settingsSwordImage.onclick=()=>swordImageFile.click(); swordImageFile.onchange=()=>chooseWeaponImage(swordImageFile);
-settingsLeft.onclick=()=>{if(settingsType==="sword")swordFrontSide="left";else gunFrontSide="left"};
-settingsRight.onclick=()=>{if(settingsType==="sword")swordFrontSide="right";else gunFrontSide="right"};
 closeSettings.onclick=()=>settingsModal.hidden=true;
 saveSettings.onclick=()=>{
   const size=Number(settingsSize.value),hp=Math.max(1,Number(settingsHp.value)||1);
-  if(settingsType==="sword"){swordSize=size;swordMaxHp=hp;localStorage.setItem("guyBattleSwordSize",size);localStorage.setItem("guyBattleSwordHp",hp);localStorage.setItem("guyBattleSwordFrontSide",swordFrontSide)}
-  else{gunSize=size;gunMaxHp=hp;localStorage.setItem("guyBattleGunSize",size);localStorage.setItem("guyBattleGunHp",hp);localStorage.setItem("guyBattleGunFrontSide",gunFrontSide)}
+  if(settingsType==="sword"){swordSize=size;swordMaxHp=hp;localStorage.setItem("guyBattleSwordSize",size);localStorage.setItem("guyBattleSwordHp",hp);}
+  else{gunSize=size;gunMaxHp=hp;localStorage.setItem("guyBattleGunSize",size);localStorage.setItem("guyBattleGunHp",hp);}
   settingsModal.hidden=true;renderCharacterPreviews();reset();
 };
-frontSwordLeft.onclick=()=>{swordFrontSide="left";localStorage.setItem("guyBattleSwordFrontSide","left");draw()};
-frontSwordRight.onclick=()=>{swordFrontSide="right";localStorage.setItem("guyBattleSwordFrontSide","right");draw()};
-frontGunLeft.onclick=()=>{gunFrontSide="left";localStorage.setItem("guyBattleGunFrontSide","left");draw()};
-frontGunRight.onclick=()=>{gunFrontSide="right";localStorage.setItem("guyBattleGunFrontSide","right");draw()};
 swordPreview.onclick=()=>{try{swordFile.click()}catch(e){}};
 gunPreview.onclick=()=>{try{gunFile.click()}catch(e){}};
 battleBtn.onclick=()=>{showBattle();start()};
@@ -293,7 +280,7 @@ function drawSword(){
   ctx.rect(sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
   ctx.clip();
   const img=customSwordImg||knightImg;
-  const swordFacingRight=(swordFrontSide==="right") ? (gun.x>=sword.x) : (gun.x<sword.x);
+  const swordFacingRight=(gun.x<sword.x);
   if(img.complete&&img.naturalWidth>0){
     ctx.save();
     ctx.translate(sword.x,sword.y);
@@ -315,7 +302,7 @@ function drawSword(){
 }
 function drawGun(){
  if(customGunImg&&customGunImg.complete&&customGunImg.naturalWidth>0){
-   const gunFacingRight=(gunFrontSide==="right") ? (sword.x>=gun.x) : (sword.x<gun.x);
+   const gunFacingRight=(sword.x<gun.x);
    ctx.save();
    ctx.beginPath();
    ctx.rect(gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
