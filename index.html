@@ -69,8 +69,7 @@ button:active{transform:scale(.98)}
     </div>
   </div>
   <button id="battleBtn" class="battle-btn" type="button">⚔️ ابدأ المعركة</button>
-  <p class="hint">اضغط على الصورة نفسها أو ✏️ لاختيار صورة. اختر اتجاه الصورة الأمامية: «← أمامي» أو «أمامي →». بعدها تنعكس الشخصية تلقائياً عند مواجهة العدو.</p>
-  <p class="hint">اضغط ✏️ بجانب أي شخصية لتغيير صورتها من هاتفك.</p>
+  <p class="hint">اضغط على صورة الشخصية لاختيار صورة من هاتفك. اختر الاتجاه الأمامي، ثم اضغط «ابدأ المعركة».</p>
 </section>
 
 <div id="settingsModal" class="settings-modal" hidden>
@@ -98,7 +97,9 @@ button:active{transform:scale(.98)}
 </section></main>
 <script>
 "use strict";
-const canvas=document.getElementById("arena"),ctx=canvas.getContext("2d");const swordHitAudio=new Audio("mixkit-metal-hit-woosh-1485.wav");swordHitAudio.preload="auto";const reloadAudio=new Audio("mixkit-shotgun-pump-1659.wav");reloadAudio.preload="auto";const gunshotAudio=new Audio(encodeURI("صوت اطلاق نار شخصيت كو بوي .mp3"));gunshotAudio.preload="auto";function playSwordHit(){try{swordHitAudio.currentTime=0;swordHitAudio.play().catch(()=>{})}catch(e){}}function playReload(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}let audioCtx=null;function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}}function tone(freq,dur,gain,type="square"){ensureAudio();if(!audioCtx)return;const t=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.45),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur)}function gunshotSound(){try{gunshotAudio.currentTime=0;gunshotAudio.play().catch(()=>{})}catch(e){}}function reloadSound(){playReload()}function swordSound(){playSwordHit()}
+const canvas=document.getElementById("arena");
+const ctx=canvas?canvas.getContext("2d"):null;
+if(!canvas||!ctx){throw new Error("Canvas غير متاح");}const swordHitAudio=new Audio("mixkit-metal-hit-woosh-1485.wav");swordHitAudio.preload="auto";const reloadAudio=new Audio("mixkit-shotgun-pump-1659.wav");reloadAudio.preload="auto";const gunshotAudio=new Audio(encodeURI("صوت اطلاق نار شخصيت كو بوي .mp3"));gunshotAudio.preload="auto";function playSwordHit(){try{swordHitAudio.currentTime=0;swordHitAudio.play().catch(()=>{})}catch(e){}}function playReload(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}let audioCtx=null;function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}}function tone(freq,dur,gain,type="square"){ensureAudio();if(!audioCtx)return;const t=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.45),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur)}function gunshotSound(){try{gunshotAudio.currentTime=0;gunshotAudio.play().catch(()=>{})}catch(e){}}function reloadSound(){playReload()}function swordSound(){playSwordHit()}
 const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB");
 const barA=document.getElementById("barA"),barB=document.getElementById("barB");
 const statusEl=document.getElementById("status");
@@ -113,6 +114,12 @@ let swordSize=150;
 let gunSize=150;
 let swordMaxHp=1000;
 let gunMaxHp=1000;
+try{
+  swordSize=Math.max(120,Math.min(120,Number(localStorage.getItem("guyBattleSwordSize"))||150));
+  gunSize=Math.max(120,Math.min(120,Number(localStorage.getItem("guyBattleGunSize"))||150));
+  swordMaxHp=Math.max(1,Number(localStorage.getItem("guyBattleSwordHp"))||1000);
+  gunMaxHp=Math.max(1,Number(localStorage.getItem("guyBattleGunHp"))||1000);
+}catch(e){}
 let settingsType="sword";
 const settingsModal=document.getElementById("settingsModal"),settingsTitle=document.getElementById("settingsTitle");
 const settingsImage=document.getElementById("settingsImage"),settingsSwordImage=document.getElementById("settingsSwordImage"),settingsCharacterImageLabel=document.getElementById("settingsCharacterImageLabel"),settingsLeft=document.getElementById("settingsLeft"),settingsRight=document.getElementById("settingsRight");
@@ -180,8 +187,8 @@ frontSwordLeft.onclick=()=>{swordFrontSide="left";localStorage.setItem("guyBattl
 frontSwordRight.onclick=()=>{swordFrontSide="right";localStorage.setItem("guyBattleSwordFrontSide","right");draw()};
 frontGunLeft.onclick=()=>{gunFrontSide="left";localStorage.setItem("guyBattleGunFrontSide","left");draw()};
 frontGunRight.onclick=()=>{gunFrontSide="right";localStorage.setItem("guyBattleGunFrontSide","right");draw()};
-swordPreview.onclick=()=>swordFile.click();
-gunPreview.onclick=()=>gunFile.click();
+swordPreview.onclick=()=>{try{swordFile.click()}catch(e){}};
+gunPreview.onclick=()=>{try{gunFile.click()}catch(e){}};
 battleBtn.onclick=()=>{showBattle();start()};
 backCharacters.onclick=showCharacters;
 swordFile.onchange=()=>chooseImage(swordFile,"sword");
