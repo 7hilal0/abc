@@ -32,6 +32,14 @@ button:active{transform:scale(.98)}
 .front-choice{position:absolute;top:58px;right:8px;display:flex;gap:4px}
 .side-btn{border:1px solid #455268;border-radius:9px;padding:6px 7px;background:#2b3546;color:#fff;font-size:11px;font-weight:800}
 .battle-btn{display:block;width:100%;margin-top:16px;background:#57e389}
+.settings-modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+.settings-box{width:min(520px,100%);background:#171e29;border:1px solid #455268;border-radius:18px;padding:16px;box-shadow:0 20px 60px #0008}
+.settings-head{display:flex;align-items:center;justify-content:space-between;font-size:20px;margin-bottom:14px}
+.settings-head button{padding:6px 10px;background:#2b3546;color:#fff}
+.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#222b39;border-radius:12px;padding:11px;margin:8px 0}
+.settings-row button{padding:8px 10px;font-size:13px;background:#2b3546;color:#fff;border:1px solid #455268}
+.settings-row input{max-width:180px}
+.settings-modal[hidden]{display:none}
 @media(max-width:520px){.characters{gap:9px}.char-info b{font-size:15px}.edit-btn{width:38px;height:38px;font-size:18px}}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .panel{background:#222b39;border-radius:12px;padding:10px}
@@ -50,13 +58,13 @@ button:active{transform:scale(.98)}
     <div class="character-card">
       <div class="char-preview" id="swordPreview"></div>
       <div class="char-info"><b>⚔️ السياف</b><span>سيف • 140 HP</span></div>
-      <button class="edit-btn" id="editSword" type="button" aria-label="تغيير صورة السياف">✏️</button>
+      <button class="edit-btn" id="editSword" type="button" aria-label="إعدادات السياف">✏️</button>
       <div class="front-choice"><button class="side-btn" id="frontSwordLeft" type="button">← أمامي</button><button class="side-btn" id="frontSwordRight" type="button">أمامي →</button></div>
     </div>
     <div class="character-card">
       <div class="char-preview" id="gunPreview"></div>
       <div class="char-info"><b>🔫 المسدد</b><span>مسدس • 120 HP</span></div>
-      <button class="edit-btn" id="editGun" type="button" aria-label="تغيير صورة المسدد">✏️</button>
+      <button class="edit-btn" id="editGun" type="button" aria-label="إعدادات المسدد">✏️</button>
       <div class="front-choice"><button class="side-btn" id="frontGunLeft" type="button">← أمامي</button><button class="side-btn" id="frontGunRight" type="button">أمامي →</button></div>
     </div>
   </div>
@@ -64,6 +72,17 @@ button:active{transform:scale(.98)}
   <p class="hint">اضغط على الصورة نفسها أو ✏️ لاختيار صورة. اختر اتجاه الصورة الأمامية: «← أمامي» أو «أمامي →». بعدها تنعكس الشخصية تلقائياً عند مواجهة العدو.</p>
   <p class="hint">اضغط ✏️ بجانب أي شخصية لتغيير صورتها من هاتفك.</p>
 </section>
+
+<div id="settingsModal" class="settings-modal" hidden>
+  <div class="settings-box">
+    <div class="settings-head"><b id="settingsTitle">إعدادات الشخصية</b><button id="closeSettings" type="button">✕</button></div>
+    <div class="settings-row"><span>الصورة</span><button id="settingsImage" type="button">🖼️ تغيير الصورة</button></div>
+    <div class="settings-row"><span>الاتجاه الأمامي</span><div><button id="settingsLeft" type="button">← يسار</button><button id="settingsRight" type="button">يمين →</button></div></div>
+    <div class="settings-row"><span>حجم الشخصية</span><input id="settingsSize" type="range" min="60" max="150" step="5"></div>
+    <div class="settings-row"><span>الحياة</span><input id="settingsHp" type="number" min="1" max="999"></div>
+    <button id="saveSettings" class="battle-btn" type="button">حفظ الإعدادات</button>
+  </div>
+</div>
 
 <section id="battlePage" class="card" hidden>
 <div id="wrap"><canvas id="arena" width="600" height="600"></canvas></div>
@@ -91,6 +110,15 @@ const frontSwordLeft=document.getElementById("frontSwordLeft"),frontSwordRight=d
 const frontGunLeft=document.getElementById("frontGunLeft"),frontGunRight=document.getElementById("frontGunRight");
 let swordFrontSide=localStorage.getItem("guyBattleSwordFrontSide")||"right";
 let gunFrontSide=localStorage.getItem("guyBattleGunFrontSide")||"right";
+let swordSize=Number(localStorage.getItem("guyBattleSwordSize"))||100;
+let gunSize=Number(localStorage.getItem("guyBattleGunSize"))||100;
+let swordMaxHp=Number(localStorage.getItem("guyBattleSwordHp"))||140;
+let gunMaxHp=Number(localStorage.getItem("guyBattleGunHp"))||120;
+let settingsType="sword";
+const settingsModal=document.getElementById("settingsModal"),settingsTitle=document.getElementById("settingsTitle");
+const settingsImage=document.getElementById("settingsImage"),settingsLeft=document.getElementById("settingsLeft"),settingsRight=document.getElementById("settingsRight");
+const settingsSize=document.getElementById("settingsSize"),settingsHp=document.getElementById("settingsHp");
+const closeSettings=document.getElementById("closeSettings"),saveSettings=document.getElementById("saveSettings");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
 const swordFile=document.getElementById("swordFile"),gunFile=document.getElementById("gunFile");
 let customSwordImg=null,customGunImg=null;
@@ -131,8 +159,25 @@ function chooseImage(input,type){
   reader.readAsDataURL(file);
   input.value="";
 }
-editSword.onclick=()=>swordFile.click();
-editGun.onclick=()=>gunFile.click();
+function openSettings(type){
+  settingsType=type;
+  settingsTitle.textContent=type==="sword"?"⚔️ إعدادات السياف":"🔫 إعدادات المسدد";
+  settingsSize.value=type==="sword"?swordSize:gunSize;
+  settingsHp.value=type==="sword"?swordMaxHp:gunMaxHp;
+  settingsModal.hidden=false;
+}
+editSword.onclick=()=>openSettings("sword");
+editGun.onclick=()=>openSettings("gun");
+settingsImage.onclick=()=>{(settingsType==="sword"?swordFile:gunFile).click()};
+settingsLeft.onclick=()=>{if(settingsType==="sword")swordFrontSide="left";else gunFrontSide="left"};
+settingsRight.onclick=()=>{if(settingsType==="sword")swordFrontSide="right";else gunFrontSide="right"};
+closeSettings.onclick=()=>settingsModal.hidden=true;
+saveSettings.onclick=()=>{
+  const size=Number(settingsSize.value),hp=Math.max(1,Number(settingsHp.value)||1);
+  if(settingsType==="sword"){swordSize=size;swordMaxHp=hp;localStorage.setItem("guyBattleSwordSize",size);localStorage.setItem("guyBattleSwordHp",hp);localStorage.setItem("guyBattleSwordFrontSide",swordFrontSide)}
+  else{gunSize=size;gunMaxHp=hp;localStorage.setItem("guyBattleGunSize",size);localStorage.setItem("guyBattleGunHp",hp);localStorage.setItem("guyBattleGunFrontSide",gunFrontSide)}
+  settingsModal.hidden=true;renderCharacterPreviews();reset();
+};
 frontSwordLeft.onclick=()=>{swordFrontSide="left";localStorage.setItem("guyBattleSwordFrontSide","left");draw()};
 frontSwordRight.onclick=()=>{swordFrontSide="right";localStorage.setItem("guyBattleSwordFrontSide","right");draw()};
 frontGunLeft.onclick=()=>{gunFrontSide="left";localStorage.setItem("guyBattleGunFrontSide","left");draw()};
@@ -153,8 +198,8 @@ function reset(){
  running=false;cancelAnimationFrame(raf);bullets=[];
  const a=Math.random()*Math.PI*2;
  let b=a+Math.PI+(Math.random()-.5)*1.4;
- Object.assign(sword,{x:145,y:300,vx:170*Math.cos(a),vy:170*Math.sin(a),hp:140,attackCd:0,swing:0,hitDone:false,angle:Math.atan2(300-300,455-145)});
- Object.assign(gun,{x:455,y:300,vx:175*Math.cos(b),vy:175*Math.sin(b),hp:120,ammo:4,shotTimer:3.6,reload:0,angle:Math.atan2(300-300,145-455)});
+ Object.assign(sword,{x:145,y:300,vx:170*Math.cos(a),vy:170*Math.sin(a),size:swordSize,maxHp:swordMaxHp,hp:swordMaxHp,attackCd:0,swing:0,hitDone:false,angle:Math.atan2(300-300,455-145)});
+ Object.assign(gun,{x:455,y:300,vx:175*Math.cos(b),vy:175*Math.sin(b),size:gunSize,maxHp:gunMaxHp,hp:gunMaxHp,ammo:4,shotTimer:3.6,reload:0,angle:Math.atan2(300-300,145-455)});
  updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
 function start(){
