@@ -49,8 +49,8 @@ button:active{transform:scale(.98)}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.stats-card{background:#222b39;border:1px solid #39465a;border-radius:12px;padding:12px}.stats-card h3{margin:0 0 8px;font-size:16px}.stats-card p{margin:5px 0;color:#c8d0dc;font-size:13px;line-height:1.5}.stats-card strong{color:#fff}.stats-card .live{color:#57e389;font-weight:900}@media(max-width:520px){.stats-grid{grid-template-columns:1fr 1fr;gap:6px}.stats-card{padding:8px}.stats-card h3{font-size:14px}.stats-card p{font-size:11px;margin:4px 0}}\n@media(max-width:520px){h1{font-size:24px}.card{padding:9px}}
 
 /* Arena visual upgrade */
-#wrap{filter:drop-shadow(0 0 16px rgba(35,180,255,.18))}
-canvas{border:5px solid #54cfff;border-radius:16px;box-shadow:inset 0 0 30px rgba(0,190,255,.12),0 0 0 2px #172d43,0 0 22px rgba(28,176,255,.28);background:radial-gradient(ellipse at center,#1b2b40 0%,#101a2a 75%,#0b1320 100%)}
+#wrap{filter:none}
+canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#202938}
 </style>
 </head>
 <body>
@@ -356,9 +356,9 @@ function updateUI(){
 }
 function draw(){
  ctx.clearRect(0,0,600,600);
- const floor=ctx.createRadialGradient(300,260,40,300,300,430);floor.addColorStop(0,"#203750");floor.addColorStop(.62,"#142438");floor.addColorStop(1,"#0b1422");ctx.fillStyle=floor;ctx.fillRect(0,0,600,600);
- ctx.save();ctx.shadowColor="#38cfff";ctx.shadowBlur=18;ctx.strokeStyle="#57d9ff";ctx.lineWidth=5;ctx.strokeRect(5,5,590,590);ctx.restore();
- ctx.strokeStyle="rgba(91,207,255,.12)";ctx.lineWidth=1.5;
+ ctx.fillStyle="#202938";ctx.fillRect(0,0,600,600);
+ ctx.strokeStyle="#657187";ctx.lineWidth=5;ctx.strokeRect(5,5,590,590);
+ ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=2;
  for(let i=150;i<600;i+=150){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.moveTo(0,i);ctx.lineTo(600,i);ctx.stroke()}
  for(const b of bullets){ctx.fillStyle="#ffd34d";ctx.beginPath();ctx.arc(b.x,b.y,5,0,Math.PI*2);ctx.fill()}
  drawSword();drawGun();drawGhost();
