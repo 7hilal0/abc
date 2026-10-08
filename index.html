@@ -407,7 +407,7 @@ function drawSword(){
   ctx.rect(sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
   ctx.clip();
   const img=customSwordImg||knightImg;
-  const swordTarget=opponentOf(sword);const swordFacingRight=swordTarget?swordTarget.x>=sword.x:true;
+  const swordTarget=opponentOf(sword);const swordFacingRight=swordTarget?swordTarget.x<sword.x:false;
   if(img.complete&&img.naturalWidth>0){
     ctx.save();
     ctx.translate(sword.x,sword.y);
@@ -445,7 +445,7 @@ function drawGhost(){
  ctx.save();
  ctx.globalAlpha=.82;
  if(ghostImg.complete&&ghostImg.naturalWidth>0){
-  const ghostTarget=opponentOf(ghost);const ghostFacingRight=ghostTarget?ghostTarget.x>=ghost.x:true;
+  const ghostTarget=opponentOf(ghost);const ghostFacingRight=ghostTarget?ghostTarget.x<ghost.x:false;
   ctx.translate(ghost.x,ghost.y);ctx.scale(ghostFacingRight?1:-1,1);
   ctx.drawImage(ghostImg,-ghost.size/2,-ghost.size/2,ghost.size,ghost.size);
  }else{
@@ -458,7 +458,7 @@ function drawGhost(){
 }
 function drawGun(){
  if((customGunImg||defaultGunImg).complete&&(customGunImg||defaultGunImg).naturalWidth>0){
-   const gunTarget=opponentOf(gun);const gunFacingRight=gunTarget?gunTarget.x>=gun.x:true;
+   const gunTarget=opponentOf(gun);const gunFacingRight=gunTarget?gunTarget.x<gun.x:false;
    ctx.save();
    ctx.beginPath();
    ctx.rect(gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
