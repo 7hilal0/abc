@@ -131,16 +131,25 @@ function draw(){
 }
 function square(x,y,size,fill){ctx.fillStyle=fill;ctx.fillRect(x-size/2,y-size/2,size,size)}
 function drawSword(){
- square(sword.x,sword.y,sword.size,"#dfe4eb");
- ctx.fillStyle="#273140";ctx.fillRect(sword.x-22,sword.y-25,44,50);
- ctx.fillStyle="#f4c36a";ctx.fillRect(sword.x-10,sword.y-28,20,10);
- ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(sword.hp),sword.x,sword.y-38);
- if(sword.swing>0){
-  const p=1-sword.swing/.32,a=sword.angle-1.0+p*2.0;
-  ctx.save();ctx.translate(sword.x,sword.y);ctx.rotate(a);ctx.globalAlpha=.95;
-  ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);
-  ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);ctx.restore();
- }
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
+  ctx.clip();
+  if(knightImg.complete&&knightImg.naturalWidth>0){
+    ctx.drawImage(knightImg,sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
+  }else{
+    square(sword.x,sword.y,sword.size,"#dfe4eb");
+    ctx.fillStyle="#273140";ctx.fillRect(sword.x-22,sword.y-25,44,50);
+    ctx.fillStyle="#f4c36a";ctx.fillRect(sword.x-10,sword.y-28,20,10);
+  }
+  ctx.restore();
+  ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(sword.hp),sword.x,sword.y-58);
+  if(sword.swing>0){
+    const p=1-sword.swing/.32,a=sword.angle-1.0+p*2.0;
+    ctx.save();ctx.translate(sword.x,sword.y);ctx.rotate(a);ctx.globalAlpha=.95;
+    ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);
+    ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);ctx.restore();
+  }
 }
 function drawGun(){
  square(gun.x,gun.y,gun.size,"#2a3445");
