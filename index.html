@@ -395,7 +395,7 @@ function drawSword(){
   ctx.rect(sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
   ctx.clip();
   const img=customSwordImg||knightImg;
-  const swordFacingRight=(gun.x<sword.x);
+  const swordTarget=opponentOf(sword);const swordFacingRight=swordTarget?swordTarget.x>=sword.x:true;
   if(img.complete&&img.naturalWidth>0){
     ctx.save();
     ctx.translate(sword.x,sword.y);
@@ -433,7 +433,9 @@ function drawGhost(){
  ctx.save();
  ctx.globalAlpha=.82;
  if(ghostImg.complete&&ghostImg.naturalWidth>0){
-  ctx.drawImage(ghostImg,ghost.x-ghost.size/2,ghost.y-ghost.size/2,ghost.size,ghost.size);
+  const ghostTarget=opponentOf(ghost);const ghostFacingRight=ghostTarget?ghostTarget.x>=ghost.x:true;
+  ctx.translate(ghost.x,ghost.y);ctx.scale(ghostFacingRight?1:-1,1);
+  ctx.drawImage(ghostImg,-ghost.size/2,-ghost.size/2,ghost.size,ghost.size);
  }else{
   ctx.fillStyle="#77e8ff";ctx.beginPath();ctx.arc(ghost.x,ghost.y,ghost.size*.38,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#102333";ctx.beginPath();ctx.arc(ghost.x-12,ghost.y-5,5,0,Math.PI*2);ctx.arc(ghost.x+12,ghost.y-5,5,0,Math.PI*2);ctx.fill();
@@ -444,7 +446,7 @@ function drawGhost(){
 }
 function drawGun(){
  if((customGunImg||defaultGunImg).complete&&(customGunImg||defaultGunImg).naturalWidth>0){
-   const gunFacingRight=(sword.x<gun.x);
+   const gunTarget=opponentOf(gun);const gunFacingRight=gunTarget?gunTarget.x>=gun.x:true;
    ctx.save();
    ctx.beginPath();
    ctx.rect(gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
@@ -455,8 +457,8 @@ function drawGun(){
    ctx.restore();
  }else{
    square(gun.x,gun.y,gun.size,"#2a3445");
- ctx.save();ctx.translate(gun.x,gun.y);
- const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);gun.angle=a;ctx.rotate(a);
+ const gunTarget=opponentOf(gun);const gunFacingRight=gunTarget?gunTarget.x>=gun.x:true;
+ ctx.save();ctx.translate(gun.x,gun.y);ctx.scale(gunFacingRight?1:-1,1);
  ctx.fillStyle="#67e34f";ctx.fillRect(-20,-22,58,32);ctx.fillStyle="#55b83d";ctx.fillRect(25,-13,34,14);ctx.fillStyle="#f0a928";ctx.fillRect(0,10,18,30);ctx.restore();
  }
  ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(gun.hp),gun.x,gun.y-gun.size/2-18);
