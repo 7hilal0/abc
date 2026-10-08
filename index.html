@@ -1,58 +1,66 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Guy Battle — Prototype</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guy Battle — Arena</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:#10131a;color:#fff;min-height:100vh}
-header{padding:18px;text-align:center;background:#171c27;border-bottom:1px solid #2a3140}h1{margin:0;font-size:28px}
-main{max-width:1000px;margin:auto;padding:18px}.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0}
-.card{background:#191f2b;border:1px solid #303849;border-radius:16px;padding:16px}.fighters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-.fighter{cursor:pointer;text-align:center;transition:.15s}.fighter:hover{transform:translateY(-3px)}.fighter.selected{outline:3px solid #57e389}
-.avatar{width:78px;height:78px;border-radius:50%;margin:auto;display:grid;place-items:center;font-size:42px;background:#252d3d}
-button{border:0;border-radius:12px;padding:12px 18px;background:#57e389;color:#08110b;font-weight:800;cursor:pointer;font-size:16px}
-button:disabled{opacity:.4}.arena{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px}.health{height:14px;background:#303746;border-radius:20px;overflow:hidden}.hp{height:100%;background:#57e389;width:100%;transition:.25s}
-.combatant{text-align:center}.vs{text-align:center;font-size:28px;font-weight:900;align-self:center}.log{height:150px;overflow:auto;background:#0b0e14;border-radius:12px;padding:10px;font-family:monospace;font-size:13px}
-@media(max-width:600px){.arena{grid-template-columns:1fr}.vs{order:2}.combatant:last-child{order:3}}
+*{box-sizing:border-box}body{margin:0;background:#10131a;color:#fff;font-family:system-ui,sans-serif}
+header{text-align:center;padding:14px;background:#171c27;border-bottom:1px solid #303849}h1{margin:0;font-size:26px}
+main{max-width:760px;margin:auto;padding:14px}.card{background:#191f2b;border:1px solid #303849;border-radius:16px;padding:14px;margin-bottom:14px}
+.fighters{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.fighter{padding:10px;border-radius:12px;border:2px solid transparent;background:#242b39;text-align:center;cursor:pointer}.fighter.selected{border-color:#57e389}
+.avatar{font-size:34px}.fighter small{display:block;color:#b9c1cf;margin-top:4px}
+button{border:0;border-radius:12px;padding:11px 17px;background:#57e389;color:#08110b;font-weight:800;font-size:16px}
+#arenaWrap{position:relative;width:min(92vw,620px);margin:auto;aspect-ratio:1/1}
+canvas{width:100%;height:100%;display:block;background:#151a23;border:4px solid #566074;border-radius:12px;touch-action:none}
+.controls{display:flex;justify-content:center;gap:10px;margin-top:10px;flex-wrap:wrap}.hint{text-align:center;color:#aeb6c5;font-size:13px;margin:8px 0}
+#joy{position:absolute;left:18px;bottom:18px;width:105px;height:105px;border-radius:50%;background:#ffffff18;border:2px solid #ffffff30;touch-action:none;display:none}
+#stick{position:absolute;left:29px;top:29px;width:43px;height:43px;border-radius:50%;background:#57e389}
+.hp{height:12px;background:#303746;border-radius:20px;overflow:hidden}.bar{height:100%;background:#57e389;width:100%;transition:.1s}
+@media(max-width:600px){.fighters{grid-template-columns:repeat(2,1fr)}#joy{display:block}}
 </style>
 </head>
 <body>
-<header><h1>⚔️ GUY BATTLE</h1><small>Independent prototype v0.1</small></header>
+<header><h1>⚔️ GUY BATTLE</h1><small>Free Arena Prototype v0.2</small></header>
 <main>
-<section class="card">
-<h2>Choose your fighter</h2>
-<div id="fighters" class="fighters"></div>
-<div style="text-align:center;margin-top:16px"><button id="start" disabled>Start Battle</button></div>
-</section>
-<section id="battle" class="card" style="display:none">
-<div class="arena">
-<div class="combatant"><div id="pAvatar" class="avatar"></div><h2 id="pName"></h2><div class="health"><div id="pHp" class="hp"></div></div><p id="pStats"></p></div>
-<div class="vs">VS</div>
-<div class="combatant"><div id="eAvatar" class="avatar"></div><h2 id="eName"></h2><div class="health"><div id="eHp" class="hp"></div></div><p id="eStats"></p></div>
-</div>
-<h3>Battle Log</h3><div id="log" class="log"></div>
-<div style="text-align:center;margin-top:12px"><button id="again">New Battle</button></div>
+<section id="select" class="card"><h2>اختر مقاتلك</h2><div id="fighters" class="fighters"></div><div class="controls"><button id="start">ابدأ المعركة</button></div></section>
+<section id="game" class="card" style="display:none">
+<div id="arenaWrap"><canvas id="arena" width="600" height="600" aria-label="ساحة القتال"></canvas><div id="joy"><div id="stick"></div></div></div>
+<p class="hint">الكمبيوتر: WASD أو الأسهم للتحرك • الهاتف: استخدم عصا التحكم</p>
+<div><b id="pLabel"></b><div class="hp"><div id="pBar" class="bar"></div></div></div>
+<div style="margin-top:7px"><b id="eLabel"></b><div class="hp"><div id="eBar" class="bar"></div></div></div>
+<p id="status" class="hint">اقترب من الخصم للهجوم تلقائيًا.</p>
+<div class="controls"><button id="restart">إعادة المعركة</button></div>
 </section>
 </main>
 <script>
 const fighters=[
-{name:"Boxer",emoji:"🥊",hp:120,dmg:18,speed:8},
-{name:"Wizard",emoji:"🧙",hp:85,dmg:30,speed:5},
-{name:"Knight",emoji:"🛡️",hp:160,dmg:15,speed:4},
-{name:"Ninja",emoji:"🥷",hp:95,dmg:21,speed:10},
-{name:"Robot",emoji:"🤖",hp:140,dmg:20,speed:6},
-{name:"Chef",emoji:"👨‍🍳",hp:105,dmg:24,speed:7}
+{name:"Boxer",emoji:"🥊",hp:120,dmg:18,speed:3.5,range:48},
+{name:"Wizard",emoji:"🧙",hp:90,dmg:27,speed:2.7,range:70},
+{name:"Knight",emoji:"🛡️",hp:160,dmg:15,speed:2.4,range:52},
+{name:"Ninja",emoji:"🥷",hp:100,dmg:21,speed:4.2,range:45},
+{name:"Robot",emoji:"🤖",hp:140,dmg:20,speed:2.9,range:55},
+{name:"Chef",emoji:"👨‍🍳",hp:110,dmg:24,speed:3.2,range:50}
 ];
-let selected=null,timer=null,pHp=0,eHp=0,enemy=null;
+let selected=0,raf=0,last=0,keys={},joy={x:0,y:0},touching=false;
+const c=document.getElementById("arena"),ctx=c.getContext("2d");
+const P={x:145,y:300,hp:100,max:100,cool:0};const E={x:455,y:300,hp:100,max:100,cool:0};
 const $=id=>document.getElementById(id);
-fighters.forEach((f,i)=>{const d=document.createElement("div");d.className="fighter card";d.innerHTML='<div class="avatar">'+f.emoji+'</div><b>'+f.name+'</b><p>❤️ '+f.hp+'<br>⚔️ '+f.dmg+'<br>⚡ '+f.speed+'</p>';d.onclick=()=>{document.querySelectorAll(".fighter").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");selected=i;$("start").disabled=false};$("fighters").appendChild(d)});
-$("start").onclick=startBattle;$("again").onclick=()=>{clearInterval(timer);$("battle").style.display="none";$("start").disabled=selected===null};
-function startBattle(){clearInterval(timer);const p=fighters[selected];enemy=fighters[Math.floor(Math.random()*fighters.length)];if(enemy===p)enemy=fighters[(selected+1)%fighters.length];pHp=p.hp;eHp=enemy.hp;$("battle").style.display="block";$("pAvatar").textContent=p.emoji;$("pName").textContent=p.name;$("eAvatar").textContent=enemy.emoji;$("eName").textContent=enemy.name;$("pStats").textContent='⚔️ '+p.dmg+'  ⚡ '+p.speed;$("eStats").textContent='⚔️ '+enemy.dmg+'  ⚡ '+enemy.speed;$("log").innerHTML="";log("Battle started! "+p.name+" vs "+enemy.name);update();timer=setInterval(()=>{turn(p,enemy);if(eHp<=0||pHp<=0){clearInterval(timer);finish(p,enemy)}},650)}
-function turn(p,e){let playerFirst=p.speed>=e.speed;if(playerFirst){hit(p,e,true);if(eHp>0)hit(e,p,false)}else{hit(e,p,false);if(pHp>0)hit(p,e,true)}update()}
-function hit(f,e,isPlayer){let dmg=Math.max(1,f.dmg+Math.floor(Math.random()*9)-4);if(isPlayer)eHp=Math.max(0,eHp-dmg);else pHp=Math.max(0,pHp-dmg);log(f.name+" hits "+e.name+" for "+dmg+" damage!")}
-function update(){let p=fighters[selected];$("pHp").style.width=Math.max(0,pHp/p.hp*100)+"%";$("eHp").style.width=Math.max(0,eHp/enemy.hp*100)+"%"}
-function finish(p,e){const win=pHp>0;log(win?"🏆 You win!":"💀 You lose!");$("again").textContent=win?"Battle won — play again":"Try again"}
-function log(t){$("log").innerHTML+="<div>"+t+"</div>";$("log").scrollTop=$("log").scrollHeight}
+fighters.forEach((f,i)=>{const d=document.createElement("div");d.className="fighter"+(i===0?" selected":"");d.innerHTML='<div class="avatar">'+f.emoji+'</div><b>'+f.name+'</b><small>❤️ '+f.hp+' • ⚔️ '+f.dmg+' • ⚡ '+f.speed+'</small>';d.onclick=()=>{selected=i;document.querySelectorAll(".fighter").forEach(x=>x.classList.remove("selected"));d.classList.add("selected")};$("fighters").appendChild(d)});
+addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=true});addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false});
+$("start").onclick=start;$("restart").onclick=start;
+function start(){cancelAnimationFrame(raf);const f=fighters[selected];P.x=145;P.y=300;E.x=455;E.y=300;P.max=P.hp=f.hp;E.max=E.hp=f.hp;P.cool=E.cool=0;$("pLabel").textContent=f.name;$("eLabel").textContent="Enemy "+fighters[(selected+1)%fighters.length].name;$("select").style.display="none";$("game").style.display="block";$("status").textContent="تحرك بحرية داخل الحلبة واقترب من الخصم للهجوم تلقائيًا.";last=performance.now();raf=requestAnimationFrame(loop)}
+function loop(t){const dt=Math.min(32,t-last)/16.67;last=t;const f=fighters[selected],ef=fighters[(selected+1)%fighters.length];
+let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);dx+=joy.x;dy+=joy.y;const m=Math.hypot(dx,dy)||1;dx/=m;dy/=m;
+P.x=clamp(P.x+dx*f.speed*dt,28,572);P.y=clamp(P.y+dy*f.speed*dt,28,572);
+let ex=P.x-E.x,ey=P.y-E.y,dist=Math.hypot(ex,ey)||1;E.x=clamp(E.x+(ex/dist)*ef.speed*.72*dt,28,572);E.y=clamp(E.y+(ey/dist)*ef.speed*.72*dt,28,572);
+P.cool-=dt;E.cool-=dt;if(dist<f.range+ef.range*.35){if(P.cool<=0){E.hp=Math.max(0,E.hp-(f.dmg+Math.random()*7-3));P.cool=25/f.speed}if(E.cool<=0){P.hp=Math.max(0,P.hp-(ef.dmg+Math.random()*7-3));E.cool=28/ef.speed}}
+draw(f,ef,dist);if(P.hp>0&&E.hp>0)raf=requestAnimationFrame(loop);else{$("status").textContent=P.hp>0?"🏆 فزت!":"💀 خسرت!";} }
+function draw(f,ef,dist){ctx.clearRect(0,0,600,600);ctx.fillStyle="#202838";ctx.fillRect(0,0,600,600);ctx.strokeStyle="#6b7487";ctx.lineWidth=6;ctx.strokeRect(5,5,590,590);
+for(let i=30;i<600;i+=60){ctx.strokeStyle="#ffffff0d";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.moveTo(0,i);ctx.lineTo(600,i);ctx.stroke()}
+unit(P,f,true);unit(E,ef,false);$("pBar").style.width=(P.hp/P.max*100)+"%";$("eBar").style.width=(E.hp/E.max*100)+"%"}
+function unit(u,f,player){ctx.beginPath();ctx.fillStyle=player?"#315b43":"#5b3030";ctx.arc(u.x,u.y,26,0,Math.PI*2);ctx.fill();ctx.font="32px sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(f.emoji,u.x,u.y);ctx.fillStyle="#fff";ctx.font="12px system-ui";ctx.fillText(Math.ceil(u.hp),u.x,u.y-39)}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+const joyEl=$("joy"),stick=$("stick");function setJoy(e){const r=joyEl.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let x=e.clientX-cx,y=e.clientY-cy,d=Math.hypot(x,y),max=32;if(d>max){x=x/d*max;y=y/d*max}joy.x=x/max;joy.y=y/max;stick.style.transform='translate('+x+'px,'+y+'px)'}
+joyEl.addEventListener("pointerdown",e=>{touching=true;joyEl.setPointerCapture(e.pointerId);setJoy(e)});joyEl.addEventListener("pointermove",e=>{if(touching)setJoy(e)});joyEl.addEventListener("pointerup",()=>{touching=false;joy.x=joy.y=0;stick.style.transform=""});
 </script>
 </body></html>
