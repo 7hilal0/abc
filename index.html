@@ -45,7 +45,7 @@ button:active{transform:scale(.98)}
 .panel{background:#222b39;border-radius:12px;padding:10px}
 .panel b{display:block;margin-bottom:6px}
 .hp{height:10px;background:#343e4e;border-radius:20px;overflow:hidden}
-.bar{height:100%;background:#57e389;width:100%}
+.bar{height:100%;background:#57e389;width:100%}.ghost-bar{background:#78e6ff}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.stats-card{background:#222b39;border:1px solid #39465a;border-radius:12px;padding:12px}.stats-card h3{margin:0 0 8px;font-size:16px}.stats-card p{margin:5px 0;color:#c8d0dc;font-size:13px;line-height:1.5}.stats-card strong{color:#fff}.stats-card .live{color:#57e389;font-weight:900}@media(max-width:520px){.stats-grid{grid-template-columns:1fr 1fr;gap:6px}.stats-card{padding:8px}.stats-card h3{font-size:14px}.stats-card p{font-size:11px;margin:4px 0}}\n@media(max-width:520px){h1{font-size:24px}.card{padding:9px}}
 
 /* Arena visual upgrade */
@@ -92,6 +92,7 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
 <div class="grid">
 <div class="panel"><b>⚔️ السياف — <span id="hpA">1000</span></b><div class="hp"><div id="barA" class="bar"></div></div></div>
 <div class="panel"><b>🔫 المسدس — <span id="hpB">1000</span></b><div class="hp"><div id="barB" class="bar"></div></div></div>
+<div class="panel"><b>👻 الشبح — <span id="hpGhost">10000</span></b><div class="hp"><div id="barGhost" class="bar ghost-bar"></div></div><small style="color:#aeb7c6">القدرة: يخترق الشخصيات ويمتص صحتها</small></div>
 </div>
 <div class="controls"><button id="start">ابدأ</button><button id="reset">إعادة</button><button id="backCharacters">👥 الشخصيات</button></div>
 <div class="stats-grid">
@@ -121,8 +122,8 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
 const canvas=document.getElementById("arena");
 const ctx=canvas?canvas.getContext("2d"):null;
 if(!canvas||!ctx){throw new Error("Canvas غير متاح");}const swordHitAudio=new Audio("mixkit-metal-hit-woosh-1485.wav");swordHitAudio.preload="auto";const reloadAudio=new Audio("mixkit-shotgun-pump-1659.wav");reloadAudio.preload="auto";const gunshotAudio=new Audio(encodeURI("صوت اطلاق نار شخصيت كو بوي .mp3"));gunshotAudio.preload="auto";function playSwordHit(){try{swordHitAudio.currentTime=0;swordHitAudio.play().catch(()=>{})}catch(e){}}function playReload(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}let audioCtx=null;function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}}function tone(freq,dur,gain,type="square"){ensureAudio();if(!audioCtx)return;const t=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.45),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur)}function gunshotSound(){try{gunshotAudio.currentTime=0;gunshotAudio.play().catch(()=>{})}catch(e){}}function reloadSound(){playReload()}function swordSound(){playSwordHit()}
-const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB");
-const barA=document.getElementById("barA"),barB=document.getElementById("barB");
+const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB"),hpGhost=document.getElementById("hpGhost");
+const barA=document.getElementById("barA"),barB=document.getElementById("barB"),barGhost=document.getElementById("barGhost");
 const statusEl=document.getElementById("status");
 const characterPage=document.getElementById("characterPage"),battlePage=document.getElementById("battlePage");
 const battleBtn=document.getElementById("battleBtn"),backCharacters=document.getElementById("backCharacters");
@@ -337,8 +338,8 @@ function bodyCollision(){
 }
 const statSwordHp=document.getElementById("statSwordHp"),statGunHp=document.getElementById("statGunHp"),statSwordSpeed=document.getElementById("statSwordSpeed"),statGunSpeed=document.getElementById("statGunSpeed"),statGunAmmo=document.getElementById("statGunAmmo"),statGunAbility=document.getElementById("statGunAbility");
 function updateUI(){
- hpA.textContent=Math.ceil(sword.hp);hpB.textContent=Math.ceil(gun.hp);
- barA.style.width=Math.max(0,sword.hp/sword.maxHp*100)+"%";barB.style.width=Math.max(0,gun.hp/gun.maxHp*100)+"%";
+ hpA.textContent=Math.ceil(sword.hp);hpB.textContent=Math.ceil(gun.hp);hpGhost.textContent=Math.ceil(ghost.hp);
+ barA.style.width=Math.max(0,sword.hp/sword.maxHp*100)+"%";barB.style.width=Math.max(0,gun.hp/gun.maxHp*100)+"%";barGhost.style.width=Math.max(0,ghost.hp/ghost.maxHp*100)+"%";
  if(statSwordHp)statSwordHp.textContent=Math.ceil(sword.hp)+" / "+sword.maxHp;
  if(statGunHp)statGunHp.textContent=Math.ceil(gun.hp)+" / "+gun.maxHp;
  if(statSwordSpeed){
