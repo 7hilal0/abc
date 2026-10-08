@@ -57,6 +57,7 @@ button:active{transform:scale(.98)}
     </div>
   </div>
   <button id="battleBtn" class="battle-btn" type="button">⚔️ ابدأ المعركة</button>
+  <p class="hint">كل شخصية لها اتجاهان: يمين ↔ يسار. الصورة تنعكس تلقائياً حسب مكان العدو.</p>
   <p class="hint">اضغط ✏️ بجانب أي شخصية لتغيير صورتها من هاتفك.</p>
 </section>
 
@@ -219,8 +220,13 @@ function drawSword(){
   ctx.rect(sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
   ctx.clip();
   const img=customSwordImg||knightImg;
+  const swordFacingRight=gun.x>=sword.x;
   if(img.complete&&img.naturalWidth>0){
-    ctx.drawImage(img,sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
+    ctx.save();
+    ctx.translate(sword.x,sword.y);
+    ctx.scale(swordFacingRight?1:-1,1);
+    ctx.drawImage(img,-sword.size/2,-sword.size/2,sword.size,sword.size);
+    ctx.restore();
   }else{
     square(sword.x,sword.y,sword.size,"#dfe4eb");
     ctx.fillStyle="#273140";ctx.fillRect(sword.x-22,sword.y-25,44,50);
@@ -237,11 +243,14 @@ function drawSword(){
 }
 function drawGun(){
  if(customGunImg&&customGunImg.complete&&customGunImg.naturalWidth>0){
+   const gunFacingRight=sword.x>=gun.x;
    ctx.save();
    ctx.beginPath();
    ctx.rect(gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
    ctx.clip();
-   ctx.drawImage(customGunImg,gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
+   ctx.translate(gun.x,gun.y);
+   ctx.scale(gunFacingRight?1:-1,1);
+   ctx.drawImage(customGunImg,-gun.size/2,-gun.size/2,gun.size,gun.size);
    ctx.restore();
  }else{
    square(gun.x,gun.y,gun.size,"#2a3445");
