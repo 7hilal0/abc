@@ -28,7 +28,7 @@ button:active{transform:scale(.98)}
 .char-info{text-align:center;padding:10px 4px 2px}
 .char-info b{display:block;font-size:18px}
 .char-info span{display:block;color:#aeb7c6;font-size:13px;margin-top:4px}
-.edit-btn{position:absolute;top:10px;right:10px;width:42px;height:42px;padding:0;border-radius:12px;background:#fff;color:#111;font-size:20px;box-shadow:0 3px 12px #0008}
+
 .front-choice{position:absolute;top:58px;right:8px;display:flex;gap:4px}
 .side-btn{border:1px solid #455268;border-radius:9px;padding:6px 7px;background:#2b3546;color:#fff;font-size:11px;font-weight:800}
 .battle-btn{display:block;width:100%;margin-top:16px;background:#57e389}
@@ -40,7 +40,7 @@ button:active{transform:scale(.98)}
 .settings-row button{padding:8px 10px;font-size:13px;background:#2b3546;color:#fff;border:1px solid #455268}
 .settings-row input{max-width:180px}
 .settings-modal[hidden]{display:none}
-@media(max-width:520px){.characters{gap:9px}.char-info b{font-size:15px}.edit-btn{width:38px;height:38px;font-size:18px}}
+@media(max-width:520px){.characters{gap:9px}.char-info b{font-size:15px}}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .panel{background:#222b39;border-radius:12px;padding:10px}
 .panel b{display:block;margin-bottom:6px}
@@ -58,13 +58,13 @@ button:active{transform:scale(.98)}
     <div class="character-card">
       <div class="char-preview" id="swordPreview"></div>
       <div class="char-info"><b>⚔️ السياف</b><span>سيف • 1000 HP</span></div>
-      <button class="edit-btn" id="editSword" type="button" aria-label="إعدادات السياف">✏️</button>
+      
       <div class="front-choice"><button class="side-btn" id="frontSwordLeft" type="button">← أمامي</button><button class="side-btn" id="frontSwordRight" type="button">أمامي →</button></div>
     </div>
     <div class="character-card">
       <div class="char-preview" id="gunPreview"></div>
       <div class="char-info"><b>🔫 المسدد</b><span>مسدس • 1000 HP</span></div>
-      <button class="edit-btn" id="editGun" type="button" aria-label="إعدادات المسدد">✏️</button>
+      
       <div class="front-choice"><button class="side-btn" id="frontGunLeft" type="button">← أمامي</button><button class="side-btn" id="frontGunRight" type="button">أمامي →</button></div>
     </div>
   </div>
@@ -105,7 +105,6 @@ const statusEl=document.getElementById("status");
 const characterPage=document.getElementById("characterPage"),battlePage=document.getElementById("battlePage");
 const battleBtn=document.getElementById("battleBtn"),backCharacters=document.getElementById("backCharacters");
 const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview");
-const editSword=document.getElementById("editSword"),editGun=document.getElementById("editGun");
 const frontSwordLeft=document.getElementById("frontSwordLeft"),frontSwordRight=document.getElementById("frontSwordRight");
 const frontGunLeft=document.getElementById("frontGunLeft"),frontGunRight=document.getElementById("frontGunRight");
 let swordFrontSide=localStorage.getItem("guyBattleSwordFrontSide")||"right";
