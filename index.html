@@ -266,10 +266,10 @@ function gunAttack(dt){
  }
 }
 function getBodyRadius(u){
-  return u===sword ? u.size*0.31 : u.size*0.30;
+  return u===sword ? u.size*0.36 : u.size*0.35;
 }
 function bulletHitsBody(b,u){
-  const rx=getBodyRadius(u), ry=u.size*0.43;
+  const rx=getBodyRadius(u), ry=u.size*0.46;
   const dx=(b.x-u.x)/rx,dy=(b.y-u.y)/ry;
   return dx*dx+dy*dy<=1;
 }
