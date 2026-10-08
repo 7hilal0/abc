@@ -166,8 +166,6 @@ function openSettings(type){
   settingsHp.value=type==="sword"?swordMaxHp:gunMaxHp;
   settingsModal.hidden=false;
 }
-editSword.onclick=()=>openSettings("sword");
-editGun.onclick=()=>openSettings("gun");
 settingsImage.onclick=()=>{(settingsType==="sword"?swordFile:gunFile).click()}; settingsSwordImage.onclick=()=>swordImageFile.click(); swordImageFile.onchange=()=>chooseWeaponImage(swordImageFile);
 settingsLeft.onclick=()=>{if(settingsType==="sword")swordFrontSide="left";else gunFrontSide="left"};
 settingsRight.onclick=()=>{if(settingsType==="sword")swordFrontSide="right";else gunFrontSide="right"};
