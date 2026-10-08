@@ -207,7 +207,7 @@ gunFile.onchange=()=>chooseImage(gunFile,"gun");
 
 const knightImg=new Image();knightImg.src="1000085677.png";
 const defaultGunImg=new Image();defaultGunImg.src="1000085688.png";
-const ghostImg=new Image();ghostImg.src="1000085704 (1).png";
+const ghostImg=new Image();ghostImg.onload=()=>{draw();renderCharacterPreviews()};ghostImg.onerror=()=>{ghostPreview.textContent="👻"};ghostImg.src=encodeURI("1000085704 (1).png");
 const defaultSwordWeaponImg=new Image();defaultSwordWeaponImg.src="b8468d8cbb01d020bc";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
 const sword={x:145,y:300,vx:175,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0,wallBoost:0};
 const gun={x:455,y:300,vx:-190,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:1.5,reload:0,reloadSoundTimer:0,angle:Math.PI};
@@ -263,9 +263,11 @@ function updateGhost(dt){
  ghost.angle=Math.atan2(dy,dx);
  // The ghost phases through bodies and absorbs health while a target is inside its center.
  for(const u of targets){
-  if(Math.abs(u.x-ghost.x)<ghost.size*.27&&Math.abs(u.y-ghost.y)<ghost.size*.27){
-   const drain=Math.min(u.hp,180*dt);
-   u.hp-=drain;ghost.hp=Math.min(ghost.maxHp,ghost.hp+drain);
+  // Characters can pass through the ghost; once inside its core, their HP is absorbed.
+  if(Math.abs(u.x-ghost.x)<ghost.size*.34&&Math.abs(u.y-ghost.y)<ghost.size*.34){
+   const drain=Math.min(u.hp,220*dt);
+   u.hp=Math.max(0,u.hp-drain);
+   ghost.hp=Math.min(ghost.maxHp,ghost.hp+drain);
   }
  }
 }
