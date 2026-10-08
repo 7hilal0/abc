@@ -305,7 +305,7 @@ function drawSword(){
   if(sword.swing>0){
     const p=1-sword.swing/.32,a=sword.angle-1.0+p*2.0;
     ctx.save();ctx.translate(sword.x,sword.y);ctx.rotate(a);ctx.globalAlpha=.95;
-    if(customSwordWeaponImg&&customSwordWeaponImg.complete&&customSwordWeaponImg.naturalWidth>0){ctx.save();ctx.translate(70,0);ctx.drawImage(customSwordWeaponImg,-70,-70,140,140);ctx.restore();}else{ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);}ctx.restore();
+    if(customSwordWeaponImg&&customSwordWeaponImg.complete&&customSwordWeaponImg.naturalWidth>0){ctx.save();ctx.translate(70,-8);ctx.drawImage(customSwordWeaponImg,-70,-70,140,140);ctx.restore();}else{ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);}ctx.restore();
   }
 }
 function drawGun(){
