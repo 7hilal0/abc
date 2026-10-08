@@ -125,8 +125,9 @@ let customSwordImg=null,customGunImg=null,customSwordWeaponImg=null; swordImageF
 function renderCharacterPreviews(){
   swordPreview.innerHTML="";gunPreview.innerHTML="";
   const si=customSwordImg||knightImg;
+  const gi=customGunImg||defaultGunImg;
   if(si.complete&&si.naturalWidth>0){const im=document.createElement("img");im.src=si.src;swordPreview.appendChild(im)}else swordPreview.textContent="⚔️";
-  if(customGunImg&&customGunImg.complete&&customGunImg.naturalWidth>0){const im=document.createElement("img");im.src=customGunImg.src;gunPreview.appendChild(im)}else gunPreview.textContent="🔫";
+  if(gi.complete&&gi.naturalWidth>0){const im=document.createElement("img");im.src=gi.src;gunPreview.appendChild(im)}else gunPreview.textContent="🔫";
 }
 function showCharacters(){
   running=false;cancelAnimationFrame(raf);characterPage.hidden=false;battlePage.hidden=true;renderCharacterPreviews();
@@ -181,7 +182,8 @@ backCharacters.onclick=showCharacters;
 swordFile.onchange=()=>chooseImage(swordFile,"sword");
 gunFile.onchange=()=>chooseImage(gunFile,"gun");
 
-const knightImg=new Image();knightImg.src="1000085677.png";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
+const knightImg=new Image();knightImg.src="1000085677.png";
+const defaultGunImg=new Image();defaultGunImg.src="1000085688.png";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
 const sword={x:145,y:300,vx:175,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0,wallBoost:0};
 const gun={x:455,y:300,vx:-190,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:1.5,reload:0,reloadSoundTimer:0,angle:Math.PI};
 let bullets=[],running=false,last=0,raf=0;
@@ -301,7 +303,7 @@ function drawSword(){
   }
 }
 function drawGun(){
- if(customGunImg&&customGunImg.complete&&customGunImg.naturalWidth>0){
+ if((customGunImg||defaultGunImg).complete&&(customGunImg||defaultGunImg).naturalWidth>0){
    const gunFacingRight=(sword.x<gun.x);
    ctx.save();
    ctx.beginPath();
@@ -309,7 +311,7 @@ function drawGun(){
    ctx.clip();
    ctx.translate(gun.x,gun.y);
    ctx.scale(gunFacingRight?1:-1,1);
-   ctx.drawImage(customGunImg,-gun.size/2,-gun.size/2,gun.size,gun.size);
+   ctx.drawImage(customGunImg||defaultGunImg,-gun.size/2,-gun.size/2,gun.size,gun.size);
    ctx.restore();
  }else{
    square(gun.x,gun.y,gun.size,"#2a3445");
