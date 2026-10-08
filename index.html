@@ -29,7 +29,8 @@ button:active{transform:scale(.98)}
 .char-info b{display:block;font-size:18px}
 .char-info span{display:block;color:#aeb7c6;font-size:13px;margin-top:4px}
 .edit-btn{position:absolute;top:10px;right:10px;width:42px;height:42px;padding:0;border-radius:12px;background:#fff;color:#111;font-size:20px;box-shadow:0 3px 12px #0008}
-.front-btn{position:absolute;top:58px;right:10px;border:1px solid #455268;border-radius:10px;padding:6px 9px;background:#2b3546;color:#fff;font-size:12px;font-weight:800}
+.front-choice{position:absolute;top:58px;right:8px;display:flex;gap:4px}
+.side-btn{border:1px solid #455268;border-radius:9px;padding:6px 7px;background:#2b3546;color:#fff;font-size:11px;font-weight:800}
 .battle-btn{display:block;width:100%;margin-top:16px;background:#57e389}
 @media(max-width:520px){.characters{gap:9px}.char-info b{font-size:15px}.edit-btn{width:38px;height:38px;font-size:18px}}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
@@ -50,17 +51,17 @@ button:active{transform:scale(.98)}
       <div class="char-preview" id="swordPreview"></div>
       <div class="char-info"><b>⚔️ السياف</b><span>سيف • 140 HP</span></div>
       <button class="edit-btn" id="editSword" type="button" aria-label="تغيير صورة السياف">✏️</button>
-      <button class="front-btn" id="frontSword" type="button">أمامي</button>
+      <div class="front-choice"><button class="side-btn" id="frontSwordLeft" type="button">← أمامي</button><button class="side-btn" id="frontSwordRight" type="button">أمامي →</button></div>
     </div>
     <div class="character-card">
       <div class="char-preview" id="gunPreview"></div>
       <div class="char-info"><b>🔫 المسدد</b><span>مسدس • 120 HP</span></div>
       <button class="edit-btn" id="editGun" type="button" aria-label="تغيير صورة المسدد">✏️</button>
-      <button class="front-btn" id="frontGun" type="button">أمامي</button>
+      <div class="front-choice"><button class="side-btn" id="frontGunLeft" type="button">← أمامي</button><button class="side-btn" id="frontGunRight" type="button">أمامي →</button></div>
     </div>
   </div>
   <button id="battleBtn" class="battle-btn" type="button">⚔️ ابدأ المعركة</button>
-  <p class="hint">اضغط على الصورة نفسها أو ✏️ لاختيار صورة. زر «أمامي» يجعل الصورة المختارة هي الوضع الأمامي، ثم تنعكس تلقائياً عند مواجهة العدو.</p>
+  <p class="hint">اضغط على الصورة نفسها أو ✏️ لاختيار صورة. اختر اتجاه الصورة الأمامية: «← أمامي» أو «أمامي →». بعدها تنعكس الشخصية تلقائياً عند مواجهة العدو.</p>
   <p class="hint">اضغط ✏️ بجانب أي شخصية لتغيير صورتها من هاتفك.</p>
 </section>
 
@@ -86,7 +87,10 @@ const characterPage=document.getElementById("characterPage"),battlePage=document
 const battleBtn=document.getElementById("battleBtn"),backCharacters=document.getElementById("backCharacters");
 const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview");
 const editSword=document.getElementById("editSword"),editGun=document.getElementById("editGun");
-const frontSword=document.getElementById("frontSword"),frontGun=document.getElementById("frontGun");
+const frontSwordLeft=document.getElementById("frontSwordLeft"),frontSwordRight=document.getElementById("frontSwordRight");
+const frontGunLeft=document.getElementById("frontGunLeft"),frontGunRight=document.getElementById("frontGunRight");
+let swordFrontSide=localStorage.getItem("guyBattleSwordFrontSide")||"right";
+let gunFrontSide=localStorage.getItem("guyBattleGunFrontSide")||"right";
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
 const swordFile=document.getElementById("swordFile"),gunFile=document.getElementById("gunFile");
 let customSwordImg=null,customGunImg=null;
@@ -129,8 +133,10 @@ function chooseImage(input,type){
 }
 editSword.onclick=()=>swordFile.click();
 editGun.onclick=()=>gunFile.click();
-frontSword.onclick=()=>{swordFile.dataset.mode="front";swordFile.click()};
-frontGun.onclick=()=>{gunFile.dataset.mode="front";gunFile.click()};
+frontSwordLeft.onclick=()=>{swordFrontSide="left";localStorage.setItem("guyBattleSwordFrontSide","left");draw()};
+frontSwordRight.onclick=()=>{swordFrontSide="right";localStorage.setItem("guyBattleSwordFrontSide","right");draw()};
+frontGunLeft.onclick=()=>{gunFrontSide="left";localStorage.setItem("guyBattleGunFrontSide","left");draw()};
+frontGunRight.onclick=()=>{gunFrontSide="right";localStorage.setItem("guyBattleGunFrontSide","right");draw()};
 swordPreview.onclick=()=>swordFile.click();
 gunPreview.onclick=()=>gunFile.click();
 battleBtn.onclick=()=>{showBattle();start()};
@@ -228,7 +234,7 @@ function drawSword(){
   ctx.rect(sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
   ctx.clip();
   const img=customSwordImg||knightImg;
-  const swordFacingRight=gun.x>=sword.x;
+  const swordFacingRight=(swordFrontSide==="right") ? (gun.x>=sword.x) : (gun.x<sword.x);
   if(img.complete&&img.naturalWidth>0){
     ctx.save();
     ctx.translate(sword.x,sword.y);
@@ -251,7 +257,7 @@ function drawSword(){
 }
 function drawGun(){
  if(customGunImg&&customGunImg.complete&&customGunImg.naturalWidth>0){
-   const gunFacingRight=sword.x>=gun.x;
+   const gunFacingRight=(gunFrontSide==="right") ? (sword.x>=gun.x) : (sword.x<gun.x);
    ctx.save();
    ctx.beginPath();
    ctx.rect(gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
