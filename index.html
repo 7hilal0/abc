@@ -243,7 +243,7 @@ function swordAttack(dt){
  }
 }
 function gunAttack(dt){
- if(gun.reload>0){gun.reload-=dt;gun.reloadSoundTimer-=dt;if(gun.reloadSoundTimer<=0&&gun.reload>0){playReload();gun.reloadSoundTimer=3}if(gun.reload<=0){gun.reload=0;gun.reloadSoundTimer=0;gun.ammo=4;gun.shotTimer=1.5}return}
+ if(gun.reload>0){gun.reload-=dt;gun.reloadSoundTimer-=dt;if(gun.reloadSoundTimer<=0&&gun.reload>0){playReload();gun.reloadSoundTimer=2}if(gun.reload<=0){gun.reload=0;gun.reloadSoundTimer=0;gun.ammo=4;gun.shotTimer=1.5}return}
  gun.shotTimer-=dt;
  if(gun.ammo>0&&gun.shotTimer<=0){
   const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);
