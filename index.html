@@ -250,9 +250,13 @@ function swordAttack(dt){
   if(d<185){sword.swing=.32;sword.attackCd=1.80;sword.hitDone=false;sword.angle=Math.atan2(gun.y-sword.y,gun.x-sword.x);swordSound()}
  }
  if(sword.swing>0&&!sword.hitDone&&sword.swing<.16){
-  if(bodyDistance(sword,gun)<185/Math.max(sword.size,gun.size)*2.0)gun.hp=Math.max(0,gun.hp-300);
+  const h=getBodyHitbox(sword);
+  const dx=Math.max(0,Math.abs(gun.x-sword.x)-h.halfW);
+  const dy=Math.max(0,Math.abs(gun.y-sword.y)-h.halfH);
+  const distanceToSwordRect=Math.hypot(dx,dy);
+  if(distanceToSwordRect<185)gun.hp=Math.max(0,gun.hp-300);
   sword.hitDone=true;
- }
+}
 }
 function gunAttack(dt){
  if(gun.reload>0){gun.reload-=dt;gun.reloadSoundTimer-=dt;if(gun.reloadSoundTimer<=0&&gun.reload>0){playReload();gun.reloadSoundTimer=2}if(gun.reload<=0){gun.reload=0;gun.reloadSoundTimer=0;gun.ammo=4;gun.shotTimer=1.5}return}
@@ -260,7 +264,7 @@ function gunAttack(dt){
  if(gun.ammo>0&&gun.shotTimer<=0){
   gunshotSound();
   const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);
-  bullets.push({x:gun.x+Math.cos(a)*38,y:gun.y+Math.sin(a)*38,vx:Math.cos(a)*520,vy:Math.sin(a)*520,life:1.4});
+  bullets.push({x:gun.x+Math.cos(a)*38,y:gun.y+Math.sin(a)*38,vx:Math.cos(a)*550,vy:Math.sin(a)*550,life:1.4});
   gun.ammo--;gun.shotTimer=gun.ammo>0?1.5:0;
   if(gun.ammo===0){gun.reload=7;gun.reloadSoundTimer=2;reloadSound()}
  }
