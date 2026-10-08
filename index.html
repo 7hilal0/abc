@@ -3,7 +3,13 @@ const fighters=[{name:"شخصية السياف",emoji:"⚔️",hp:140,dmg:25,spe
 const c=document.getElementById("arena"),ctx=c.getContext("2d"),$=id=>document.getElementById(id);let selected=[],raf=0,last=0,bullets=[],gunReady=false;const gunImg=new Image();gunImg.crossOrigin="anonymous";gunImg.src="https://w7.pngwing.com/pngs/1010/344/png-transparent-revolver-toy-weapon-pistol-cap-gun-toy-photography-piracy-handgun.png";gunImg.onload=()=>gunReady=true;
 const A={x:150,y:300,vx:3,vy:1.8,hp:100,max:100,r:58,cool:0,attack:0,hit:0,angle:0},B={x:450,y:300,vx:-3,vy:-1.8,hp:100,max:100,r:58,cool:0,attack:0,hit:0,angle:0,ammo:4,gunTimer:3.6,reloadTimer:0};
 fighters.forEach((f,i)=>{const d=document.createElement("div");d.className="fighter";d.innerHTML='<div class="avatar">'+f.emoji+'</div><b>'+f.name+'</b><small>❤️ '+f.hp+' • ⚔️ '+f.dmg+' • ⚡ '+f.speed+'</small>';d.onclick=()=>toggle(i);$("fighters").appendChild(d)});
-function toggle(i){selected=[0];document.querySelectorAll(".fighter").forEach((x,j)=>x.classList.toggle("selected",selected.includes(j)));$("start").disabled=selected.length!==2;$("start").textContent="ابدأ المعركة ("+selected.length+"/2)"}
+function toggle(i){
+ if(selected.includes(i)) selected=selected.filter(x=>x!==i);
+ else if(selected.length<2) selected.push(i);
+ document.querySelectorAll(".fighter").forEach((x,j)=>x.classList.toggle("selected",selected.includes(j)));
+ $("start").disabled=selected.length!==2;
+ $("start").textContent="ابدأ المعركة ("+selected.length+"/2)";
+}
 $("start").onclick=start;$("restart").onclick=start;$("choose").onclick=()=>{cancelAnimationFrame(raf);$("game").style.display="none";$("select").style.display="block"};
 function start(){const f=fighters[selected[0]],e=fighters[selected[1]];A.x=150;A.y=300;A.vx=f.speed*(Math.random()<.5?1:-1);A.vy=f.speed*(Math.random()<.5?1:-1)*.72;A.max=A.hp=f.hp;A.cool=0;A.attack=0;A.hit=0;B.x=450;B.y=300;B.vx=e.speed*(Math.random()<.5?1:-1);B.vy=e.speed*(Math.random()<.5?1:-1)*.72;B.max=B.hp=e.hp;B.cool=0;B.attack=0;B.hit=0;B.ammo=4;B.gunTimer=3.6;B.reloadTimer=0;bullets=[];$("pLabel").textContent=f.name+" "+f.emoji;$("eLabel").textContent=e.name+" "+e.emoji;$("select").style.display="none";$("game").style.display="block";$("status").textContent="راقب التصادم: عند الاصطدام يرتدان عن بعضهما، والجدران تعيد توجيههما إلى داخل الحلبة.";last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(loop)}
 function loop(t){const dt=Math.min(32,t-last)/16.67;last=t;move(A,dt);move(B,dt);attackCheck(A,B,dt);attackCheck(B,A,dt);gunUpdate(dt);collide();draw();if(A.hp>0&&B.hp>0)raf=requestAnimationFrame(loop);else $("status").textContent=A.hp>0?"🏆 "+fighters[selected[0]].name+" فاز!":"🏆 "+fighters[selected[1]].name+" فاز!"}
