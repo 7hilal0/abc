@@ -346,6 +346,16 @@ function drawSword(){
     ctx.fillStyle="#f4c36a";ctx.fillRect(sword.x-10,sword.y-28,20,10);
   }
   ctx.restore();
+  if(sword.wallBoost>0){
+    const pulse=.72+.28*Math.sin(performance.now()/90);
+    ctx.save();
+    ctx.strokeStyle="rgba(120,230,255,"+pulse+")";
+    ctx.lineWidth=3;
+    ctx.shadowColor="rgba(80,220,255,.65)";
+    ctx.shadowBlur=8;
+    ctx.strokeRect(sword.x-sword.size/2+2,sword.y-sword.size/2+2,sword.size-4,sword.size-4);
+    ctx.restore();
+  }
   ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(sword.hp),sword.x,sword.y-sword.size/2-18);
   if(sword.swing>0){
     const p=1-sword.swing/.32,a=sword.angle-1.0+p*2.0;
