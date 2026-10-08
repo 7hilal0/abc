@@ -20,6 +20,17 @@ button{border:0;border-radius:13px;padding:12px 20px;background:#57e389;color:#0
 button:active{transform:scale(.98)}
 .hint{text-align:center;color:#aeb7c6;margin:10px 0;font-size:14px}
 .image-controls button{background:#2b3546;color:#fff;border:1px solid #455268;font-size:14px;padding:10px 14px}
+.select-title{text-align:center;margin:8px 0 18px}
+.characters{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.character-card{position:relative;background:#222b39;border:1px solid #39465a;border-radius:16px;padding:12px;min-width:0}
+.char-preview{width:100%;aspect-ratio:1/1;background:#151b25;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:56px}
+.char-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.char-info{text-align:center;padding:10px 4px 2px}
+.char-info b{display:block;font-size:18px}
+.char-info span{display:block;color:#aeb7c6;font-size:13px;margin-top:4px}
+.edit-btn{position:absolute;top:10px;right:10px;width:42px;height:42px;padding:0;border-radius:12px;background:#fff;color:#111;font-size:20px;box-shadow:0 3px 12px #0008}
+.battle-btn{display:block;width:100%;margin-top:16px;background:#57e389}
+@media(max-width:520px){.characters{gap:9px}.char-info b{font-size:15px}.edit-btn{width:38px;height:38px;font-size:18px}}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .panel{background:#222b39;border-radius:12px;padding:10px}
 .panel b{display:block;margin-bottom:6px}
@@ -29,22 +40,36 @@ button:active{transform:scale(.98)}
 </style>
 </head>
 <body>
-<header><h1>⚔️ GUY BATTLE</h1><small>Clean Build • v1.0</small></header>
-<main><section class="card">
+<header><h1>⚔️ GUY BATTLE</h1><small>اختيار الشخصيات</small></header>
+<main>
+<section id="characterPage" class="card">
+  <h2 class="select-title">اختار شخصيات المعركة</h2>
+  <div class="characters">
+    <div class="character-card">
+      <div class="char-preview" id="swordPreview"></div>
+      <div class="char-info"><b>⚔️ السياف</b><span>سيف • 140 HP</span></div>
+      <button class="edit-btn" id="editSword" type="button" aria-label="تغيير صورة السياف">✏️</button>
+    </div>
+    <div class="character-card">
+      <div class="char-preview" id="gunPreview"></div>
+      <div class="char-info"><b>🔫 المسدد</b><span>مسدس • 120 HP</span></div>
+      <button class="edit-btn" id="editGun" type="button" aria-label="تغيير صورة المسدد">✏️</button>
+    </div>
+  </div>
+  <button id="battleBtn" class="battle-btn" type="button">⚔️ ابدأ المعركة</button>
+  <p class="hint">اضغط ✏️ بجانب أي شخصية لتغيير صورتها من هاتفك.</p>
+</section>
+
+<section id="battlePage" class="card" hidden>
 <div id="wrap"><canvas id="arena" width="600" height="600"></canvas></div>
 <p id="status" class="hint">السياف والمسدد يتحركان تلقائياً داخل الحلبة.</p>
 <div class="grid">
 <div class="panel"><b>⚔️ السياف — <span id="hpA">140</span></b><div class="hp"><div id="barA" class="bar"></div></div></div>
 <div class="panel"><b>🔫 المسدس — <span id="hpB">120</span></b><div class="hp"><div id="barB" class="bar"></div></div></div>
 </div>
-<div class="controls"><button id="start">ابدأ المعركة</button><button id="reset">إعادة</button></div>
-<div class="controls image-controls">
-  <button id="pickSword" type="button">🖼️ صورة السياف</button>
-  <button id="pickGun" type="button">🖼️ صورة المسدد</button>
-  <input id="swordFile" type="file" accept="image/*" hidden>
-  <input id="gunFile" type="file" accept="image/*" hidden>
-</div>
-<p class="hint">اختر صورة لكل شخصية من هاتفك. الصور تُحفظ محلياً في هذا المتصفح ولا تُرفع إلى الخادم.</p>
+<div class="controls"><button id="start">ابدأ</button><button id="reset">إعادة</button><button id="backCharacters">👥 الشخصيات</button></div>
+<input id="swordFile" type="file" accept="image/*" hidden>
+<input id="gunFile" type="file" accept="image/*" hidden>
 <p class="hint">السياف: ضربة سيف. المسدس: 4 طلقات، كل طلقة بعد 3.6 ثوانٍ، ثم إعادة تعبئة 7 ثوانٍ.</p>
 </section></main>
 <script>
@@ -53,17 +78,33 @@ const canvas=document.getElementById("arena"),ctx=canvas.getContext("2d");
 const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB");
 const barA=document.getElementById("barA"),barB=document.getElementById("barB");
 const statusEl=document.getElementById("status");
+const characterPage=document.getElementById("characterPage"),battlePage=document.getElementById("battlePage");
+const battleBtn=document.getElementById("battleBtn"),backCharacters=document.getElementById("backCharacters");
+const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview");
+const editSword=document.getElementById("editSword"),editGun=document.getElementById("editGun");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
 const pickSword=document.getElementById("pickSword"),pickGun=document.getElementById("pickGun");
 const swordFile=document.getElementById("swordFile"),gunFile=document.getElementById("gunFile");
 let customSwordImg=null,customGunImg=null;
 
+function renderCharacterPreviews(){
+  swordPreview.innerHTML="";gunPreview.innerHTML="";
+  const si=customSwordImg||knightImg;
+  if(si.complete&&si.naturalWidth>0){const im=document.createElement("img");im.src=si.src;swordPreview.appendChild(im)}else swordPreview.textContent="⚔️";
+  if(customGunImg&&customGunImg.complete&&customGunImg.naturalWidth>0){const im=document.createElement("img");im.src=customGunImg.src;gunPreview.appendChild(im)}else gunPreview.textContent="🔫";
+}
+function showCharacters(){
+  running=false;cancelAnimationFrame(raf);characterPage.hidden=false;battlePage.hidden=true;renderCharacterPreviews();
+}
+function showBattle(){
+  characterPage.hidden=true;battlePage.hidden=false;reset();
+}
 function loadSavedImages(){
   try{
     const s=localStorage.getItem("guyBattleSwordImage");
     const g=localStorage.getItem("guyBattleGunImage");
-    if(s){customSwordImg=new Image();customSwordImg.onload=()=>draw();customSwordImg.src=s;}
-    if(g){customGunImg=new Image();customGunImg.onload=()=>draw();customGunImg.src=g;}
+    if(s){customSwordImg=new Image();customSwordImg.onload=()=>{draw();renderCharacterPreviews()};customSwordImg.src=s;}
+    if(g){customGunImg=new Image();customGunImg.onload=()=>{draw();renderCharacterPreviews()};customGunImg.src=g;}
   }catch(e){}
 }
 function chooseImage(input,type){
@@ -75,7 +116,7 @@ function chooseImage(input,type){
     img.onload=()=>{
       if(type==="sword"){customSwordImg=img;try{localStorage.setItem("guyBattleSwordImage",reader.result)}catch(e){}}
       else{customGunImg=img;try{localStorage.setItem("guyBattleGunImage",reader.result)}catch(e){}}
-      draw();
+      draw();renderCharacterPreviews();
     };
     img.src=reader.result;
   };
@@ -84,6 +125,10 @@ function chooseImage(input,type){
 }
 pickSword.onclick=()=>swordFile.click();
 pickGun.onclick=()=>gunFile.click();
+editSword.onclick=()=>swordFile.click();
+editGun.onclick=()=>gunFile.click();
+battleBtn.onclick=()=>{showBattle();start()};
+backCharacters.onclick=showCharacters;
 swordFile.onchange=()=>chooseImage(swordFile,"sword");
 gunFile.onchange=()=>chooseImage(gunFile,"gun");
 
@@ -211,7 +256,7 @@ function drawGun(){
  ctx.font="bold 11px system-ui";ctx.fillText(gun.reload>0?"🔄 "+gun.reload.toFixed(1)+"s":"🔫 "+gun.ammo+"/4",gun.x,gun.y+43);
 }
 loadSavedImages();
-reset();
+showCharacters();
 </script>
 </body>
 </html>
