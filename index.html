@@ -219,7 +219,7 @@ saveSettings.onclick=()=>{
 };
 swordPreview.onclick=()=>{try{swordFile.click()}catch(e){}};
 gunPreview.onclick=()=>{try{gunFile.click()}catch(e){}};
-battleBtn.onclick=()=>{showBattle();start()};
+battleBtn.onclick=()=>{if(selectedChars.size!==2){alert("اختار شخصيتين بالضبط قبل بدء المعركة.");return;}showBattle();start()};
 backCharacters.onclick=showCharacters;
 swordFile.onchange=()=>chooseImage(swordFile,"sword");
 gunFile.onchange=()=>chooseImage(gunFile,"gun");
