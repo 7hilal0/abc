@@ -46,7 +46,7 @@ button:active{transform:scale(.98)}
 .panel b{display:block;margin-bottom:6px}
 .hp{height:10px;background:#343e4e;border-radius:20px;overflow:hidden}
 .bar{height:100%;background:#57e389;width:100%}
-@media(max-width:520px){h1{font-size:24px}.card{padding:9px}}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.stats-card{background:#222b39;border:1px solid #39465a;border-radius:12px;padding:12px}.stats-card h3{margin:0 0 8px;font-size:16px}.stats-card p{margin:5px 0;color:#c8d0dc;font-size:13px;line-height:1.5}.stats-card strong{color:#fff}.stats-card .live{color:#57e389;font-weight:900}@media(max-width:520px){.stats-grid{grid-template-columns:1fr}.stats-card p{font-size:12px}}\n@media(max-width:520px){h1{font-size:24px}.card{padding:9px}}
 </style>
 </head>
 <body>
@@ -86,6 +86,24 @@ button:active{transform:scale(.98)}
 <div class="panel"><b>🔫 المسدس — <span id="hpB">1000</span></b><div class="hp"><div id="barB" class="bar"></div></div></div>
 </div>
 <div class="controls"><button id="start">ابدأ</button><button id="reset">إعادة</button><button id="backCharacters">👥 الشخصيات</button></div>
+<div class="stats-grid">
+  <div class="stats-card">
+    <h3>⚔️ السياف</h3>
+    <p>❤️ الهيلث: <strong id="statSwordHp">1000 / 1000</strong></p>
+    <p>⚡ السرعة: <strong id="statSwordSpeed">175</strong></p>
+    <p>💥 ضرر الضربة: <strong>300</strong></p>
+    <p>🗡️ المدى: <strong>185</strong></p>
+    <p>✨ القدرة: <strong>ضربة سيف قريبة</strong></p>
+  </div>
+  <div class="stats-card">
+    <h3>🔫 المسدد</h3>
+    <p>❤️ الهيلث: <strong id="statGunHp">1000 / 1000</strong></p>
+    <p>⚡ السرعة: <strong id="statGunSpeed">190</strong></p>
+    <p>💥 ضرر الطلقة: <strong>220</strong></p>
+    <p>🔫 الذخيرة: <strong class="live" id="statGunAmmo">4 / 4</strong></p>
+    <p>✨ القدرة: <strong id="statGunAbility">4 طلقات ثم إعادة تعبئة 7 ثوانٍ</strong></p>
+  </div>
+</div>
 <input id="swordFile" type="file" accept="image/*" hidden>
 <input id="gunFile" type="file" accept="image/*" hidden>
 <p class="hint">السياف: ضربة سيف مع صوت. المسدس: 4 طلقات، كل طلقة بعد 1.5 ثانية، ثم إعادة تعبئة 7 ثوانٍ.</p>
@@ -263,9 +281,16 @@ function bodyCollision(){
   if(rv<0){sword.vx+=rv*nx;sword.vy+=rv*ny;gun.vx-=rv*nx;gun.vy-=rv*ny}
  }
 }
+const statSwordHp=document.getElementById("statSwordHp"),statGunHp=document.getElementById("statGunHp"),statSwordSpeed=document.getElementById("statSwordSpeed"),statGunSpeed=document.getElementById("statGunSpeed"),statGunAmmo=document.getElementById("statGunAmmo"),statGunAbility=document.getElementById("statGunAbility");
 function updateUI(){
  hpA.textContent=Math.ceil(sword.hp);hpB.textContent=Math.ceil(gun.hp);
  barA.style.width=Math.max(0,sword.hp/sword.maxHp*100)+"%";barB.style.width=Math.max(0,gun.hp/gun.maxHp*100)+"%";
+ if(statSwordHp)statSwordHp.textContent=Math.ceil(sword.hp)+" / "+sword.maxHp;
+ if(statGunHp)statGunHp.textContent=Math.ceil(gun.hp)+" / "+gun.maxHp;
+ if(statSwordSpeed)statSwordSpeed.textContent=Math.round(Math.hypot(sword.vx,sword.vy))+(sword.wallBoost>0?" (180 بعد اصطدام الجدار)":"");
+ if(statGunSpeed)statGunSpeed.textContent=Math.round(Math.hypot(gun.vx,gun.vy));
+ if(statGunAmmo)statGunAmmo.textContent=gun.reload>0?"إعادة تعبئة "+gun.reload.toFixed(1)+" ث":gun.ammo+" / 4";
+ if(statGunAbility)statGunAbility.textContent=gun.reload>0?"إعادة التعبئة جارية":"4 طلقات • كل 1.5 ث";
 }
 function draw(){
  ctx.clearRect(0,0,600,600);
