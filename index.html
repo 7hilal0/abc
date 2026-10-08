@@ -1,29 +1,154 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>Guy Battle — Physics Arena v0.5 • 4×4 Arena</title><style>*{box-sizing:border-box}body{margin:0;background:#10131a;color:#fff;font-family:system-ui,sans-serif}header{text-align:center;padding:14px;background:#171c27;border-bottom:1px solid #303849}h1{margin:0;font-size:26px}main{max-width:760px;margin:auto;padding:14px}.card{background:#191f2b;border:1px solid #303849;border-radius:16px;padding:14px;margin-bottom:14px}.fighters{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.fighter{padding:10px;border-radius:12px;border:2px solid transparent;background:#242b39;text-align:center;cursor:pointer}.fighter.selected{border-color:#57e389}.avatar{font-size:34px}.fighter small{display:block;color:#b9c1cf;margin-top:4px}button{border:0;border-radius:12px;padding:11px 17px;background:#57e389;color:#08110b;font-weight:800;font-size:16px}button:disabled{opacity:.45}#arenaWrap{position:relative;width:min(78vw,460px);margin:auto;aspect-ratio:1/1}canvas{width:100%;height:100%;display:block;background:#151a23;border:4px solid #566074;border-radius:12px}.controls{display:flex;justify-content:center;gap:10px;margin-top:10px;flex-wrap:wrap}.hint{text-align:center;color:#aeb6c5;font-size:13px;margin:8px 0}.hp{height:12px;background:#303746;border-radius:20px;overflow:hidden}.bar{height:100%;background:#57e389;width:100%;transition:.1s}@media(max-width:600px){.fighters{grid-template-columns:repeat(2,1fr)}}</style></head><body><header><h1>⚔️ GUY BATTLE</h1><small>Physics Arena v1.2 • Movement Fixed</small></header><main><section id="select" class="card"><h2>اختر الشخصيتين</h2><p class="hint">اختر شخصية المسدس وشخصية السياف. كل شخصية ستستخدم سلاحها أثناء القتال.</p><div id="fighters" class="fighters"></div><div class="controls"><button id="start">ابدأ المعركة (2/2)</button></div></section><section id="game" class="card" style="display:none"><div id="arenaWrap"><canvas id="arena" width="600" height="600" aria-label="ساحة قتال مربعة"></canvas></div><p class="hint">حركة تلقائية • ارتداد من الجدران • ارتداد بين الشخصيتين • ضرر عند التصادم</p><div><b id="pLabel"></b><div class="hp"><div id="pBar" class="bar"></div></div></div><div style="margin-top:7px"><b id="eLabel"></b><div class="hp"><div id="eBar" class="bar"></div></div></div><p id="status" class="hint">الشخصيتان تتجهان داخل الحلبة وتعودان لبعضهما بعد الارتداد.</p><div class="controls"><button id="restart">إعادة المعركة</button><button id="choose">اختيار شخصيات أخرى</button></div></section></main><script>
-const swordsmanImg=new Image();swordsmanImg.crossOrigin="anonymous";swordsmanImg.src="https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDI0LTAxL3Jhd3BpeGVsX29mZmljZV80MF9hX2Z1bGxfYm9keV9waG90b19vZl9hX2tuaWdodF9sdW5naW5nX2Ffc3dvcl8zZGQyOGUyNC1jOGY0LTQwYzktOWU4MS0yZWM2MGQwNTdhZTQucG5n.png";
-const fighters=[{name:"شخصية السياف",emoji:"⚔️",hp:140,dmg:25,speed:3.0},{name:"شخصية المسدس",emoji:"🔫",hp:120,dmg:22,speed:3.2}];
-const c=document.getElementById("arena"),ctx=c.getContext("2d"),$=id=>document.getElementById(id);let selected=[0,1],raf=0,last=0,bullets=[],gunReady=false,gameRunning=false;const gunImg=new Image();gunImg.crossOrigin="anonymous";gunImg.src="https://w7.pngwing.com/pngs/1010/344/png-transparent-revolver-toy-weapon-pistol-cap-gun-toy-photography-piracy-handgun.png";gunImg.onload=()=>gunReady=true;
-const A={x:150,y:300,vx:3,vy:1.8,hp:100,max:100,r:58,cool:0,attack:0,hit:0,angle:0},B={x:450,y:300,vx:-3,vy:-1.8,hp:100,max:100,r:58,cool:0,attack:0,hit:0,angle:0,ammo:4,gunTimer:3.6,reloadTimer:0};
-fighters.forEach((f,i)=>{const d=document.createElement("div");d.className="fighter";d.innerHTML='<div class="avatar">'+f.emoji+'</div><b>'+f.name+'</b><small>❤️ '+f.hp+' • ⚔️ '+f.dmg+' • ⚡ '+f.speed+'</small>';d.onclick=()=>toggle(i);$("fighters").appendChild(d)});
-function toggle(i){
- if(selected.length===2 && !selected.includes(i)) return;
- if(selected.includes(i)) return;
- selected.push(i);
- document.querySelectorAll(".fighter").forEach((x,j)=>x.classList.toggle("selected",selected.includes(j)));
- $("start").disabled=selected.length!==2;
- $("start").textContent="ابدأ المعركة ("+selected.length+"/2)";
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1118">
+<title>GUY BATTLE • Clean Build</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0d1118;color:#fff;font-family:system-ui,-apple-system,sans-serif}
+header{text-align:center;padding:18px 12px;background:#151b25;border-bottom:1px solid #2b3444}
+h1{margin:0;font-size:28px}
+header small{color:#aeb7c6}
+main{max-width:760px;margin:auto;padding:14px}
+.card{background:#171e29;border:1px solid #303a4b;border-radius:18px;padding:14px}
+#wrap{width:min(94vw,620px);margin:auto}
+canvas{width:100%;height:auto;display:block;background:#202938;border:5px solid #5d687d;border-radius:14px}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+button{border:0;border-radius:13px;padding:12px 20px;background:#57e389;color:#07110a;font-weight:900;font-size:17px}
+button:active{transform:scale(.98)}
+.hint{text-align:center;color:#aeb7c6;margin:10px 0;font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.panel{background:#222b39;border-radius:12px;padding:10px}
+.panel b{display:block;margin-bottom:6px}
+.hp{height:10px;background:#343e4e;border-radius:20px;overflow:hidden}
+.bar{height:100%;background:#57e389;width:100%}
+@media(max-width:520px){h1{font-size:24px}.card{padding:9px}}
+</style>
+</head>
+<body>
+<header><h1>⚔️ GUY BATTLE</h1><small>Clean Build • v1.0</small></header>
+<main><section class="card">
+<div id="wrap"><canvas id="arena" width="600" height="600"></canvas></div>
+<p id="status" class="hint">السياف والمسدد يتحركان تلقائياً داخل الحلبة.</p>
+<div class="grid">
+<div class="panel"><b>⚔️ السياف — <span id="hpA">140</span></b><div class="hp"><div id="barA" class="bar"></div></div></div>
+<div class="panel"><b>🔫 المسدس — <span id="hpB">120</span></b><div class="hp"><div id="barB" class="bar"></div></div></div>
+</div>
+<div class="controls"><button id="start">ابدأ المعركة</button><button id="reset">إعادة</button></div>
+<p class="hint">السياف: ضربة سيف. المسدس: 4 طلقات، كل طلقة بعد 3.6 ثوانٍ، ثم إعادة تعبئة 7 ثوانٍ.</p>
+</section></main>
+<script>
+"use strict";
+const canvas=document.getElementById("arena"),ctx=canvas.getContext("2d");
+const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB");
+const barA=document.getElementById("barA"),barB=document.getElementById("barB");
+const statusEl=document.getElementById("status");
+const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
+
+const sword={x:145,y:300,vx:170,vy:105,size:58,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0};
+const gun={x:455,y:300,vx:-175,vy:-100,size:58,hp:120,maxHp:120,ammo:4,shotTimer:3.6,reload:0};
+let bullets=[],running=false,last=0,raf=0;
+
+function reset(){
+ running=false;cancelAnimationFrame(raf);bullets=[];
+ Object.assign(sword,{x:145,y:300,vx:170,vy:105,hp:140,attackCd:0,swing:0,hitDone:false,angle:0});
+ Object.assign(gun,{x:455,y:300,vx:-175,vy:-100,hp:120,ammo:4,shotTimer:3.6,reload:0});
+ updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
-$("start").onclick=start;$("restart").onclick=start;$("choose").onclick=()=>{gameRunning=false;cancelAnimationFrame(raf);selected=[0,1];document.querySelectorAll(".fighter").forEach((x,j)=>x.classList.toggle("selected",true));$("start").disabled=false;$("start").textContent="ابدأ المعركة (2/2)";$("game").style.display="none";$("select").style.display="block"};
-function start(){if(selected.length!==2)return;gameRunning=true;const f=fighters[selected[0]],e=fighters[selected[1]];A.x=140;A.y=300;A.vx=f.speed*1.6;A.vy=f.speed*.9;A.max=A.hp=f.hp;A.cool=0;A.attack=0;A.hit=0;B.x=460;B.y=300;B.vx=-e.speed*1.6;B.vy=-e.speed*.9;B.max=B.hp=e.hp;B.cool=0;B.attack=0;B.hit=0;B.ammo=4;B.gunTimer=3.6;B.reloadTimer=0;bullets=[];$("pLabel").textContent=f.name+" "+f.emoji;$("eLabel").textContent=e.name+" "+e.emoji;$("select").style.display="none";$("game").style.display="block";$("status").textContent="راقب التصادم: عند الاصطدام يرتدان عن بعضهما، والجدران تعيد توجيههما إلى داخل الحلبة.";last=performance.now();gameRunning=true;cancelAnimationFrame(raf);draw();raf=requestAnimationFrame(loop)}
-function loop(t){if(!gameRunning)return;const dt=Math.max(.5,Math.min(2,(t-last)/16.6667));last=t;move(A,dt);move(B,dt);attackCheck(A,B,dt);attackCheck(B,A,dt);gunUpdate(dt);collide();draw();if(gameRunning&&A.hp>0&&B.hp>0)raf=requestAnimationFrame(loop);else $("status").textContent=A.hp>0?"🏆 "+fighters[selected[0]].name+" فاز!":"🏆 "+fighters[selected[1]].name+" فاز!"}
-function move(u,dt){u.x+=u.vx*dt;u.y+=u.vy*dt;u.cool-=dt;u.attack=Math.max(0,u.attack-dt);if(u.x-u.r<8){u.x=8+u.r;u.vx=Math.abs(u.vx)}if(u.x+u.r>592){u.x=592-u.r;u.vx=-Math.abs(u.vx)}if(u.y-u.r<8){u.y=8+u.r;u.vy=Math.abs(u.vy)}if(u.y+u.r>592){u.y=592-u.r;u.vy=-Math.abs(u.vy)}}
-function collide(){let dx=B.x-A.x,dy=B.y-A.y,dist=Math.hypot(dx,dy)||.001,min=A.r+B.r;if(dist<min){const nx=dx/dist,ny=dy/dist,overlap=min-dist;A.x-=nx*overlap/2;A.y-=ny*overlap/2;B.x+=nx*overlap/2;B.y+=ny*overlap/2;const rel=(B.vx-A.vx)*nx+(B.vy-A.vy)*ny;if(rel<0){const impulse=-rel*1.05;A.vx-=impulse*nx;A.vy-=impulse*ny;B.vx+=impulse*nx;B.vy+=impulse*ny}const f=fighters[selected[0]],e=fighters[selected[1]];if(A.cool<=0&&B.cool<=0){A.hp=Math.max(0,A.hp-(e.dmg+Math.random()*6));B.hp=Math.max(0,B.hp-(f.dmg+Math.random()*6));A.cool=18;B.cool=18}}}
-function gunUpdate(dt){const sec=dt/60;if(B.reloadTimer>0){B.reloadTimer-=sec;if(B.reloadTimer<=0){B.ammo=4;B.gunTimer=3.6}}else{B.gunTimer-=sec;if(B.ammo>0&&B.gunTimer<=0){const ang=Math.atan2(A.y-B.y,A.x-B.x);bullets.push({x:B.x+Math.cos(ang)*48,y:B.y+Math.sin(ang)*48,vx:Math.cos(ang)*520,vy:Math.sin(ang)*520,life:1.5});B.ammo--;if(B.ammo===0)B.reloadTimer=7;else B.gunTimer=3.6}}for(const q of bullets){q.x+=q.vx*sec;q.y+=q.vy*sec;q.life-=sec;if(Math.hypot(q.x-A.x,q.y-A.y)<A.r+8&&q.life>0){A.hp=Math.max(0,A.hp-22);q.life=0}}bullets=bullets.filter(q=>q.life>0)}
-function drawGun(){const img=gunImg;if(!img.src)return;const ang=Math.atan2(A.y-B.y,A.x-B.x);ctx.save();ctx.translate(B.x+Math.cos(ang)*42,B.y+Math.sin(ang)*42);ctx.rotate(ang+Math.PI);ctx.drawImage(img,-48,-38,96,76);ctx.restore()}
-function drawBullets(){for(const q of bullets){ctx.beginPath();ctx.fillStyle="#ffd34d";ctx.arc(q.x,q.y,5,0,Math.PI*2);ctx.fill()}}
-function gunInfo(){ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(B.reloadTimer>0?"🔄 إعادة تعبئة "+B.reloadTimer.toFixed(1)+"s":"🔫 "+B.ammo+"/4",B.x,B.y+94)}
-function attackCheck(u,target,dt){if(u!==A)return;const dx=target.x-u.x,dy=target.y-u.y,dist=Math.hypot(dx,dy);if(u.attack<=0&&u.cool<=0&&dist<250){u.attack=18;u.cool=42;u.hit=0;u.angle=Math.atan2(dy,dx)}if(u.attack>0){u.angle+=0.18*dt;if(u.attack<10&&u.hit===0){if(dist<235){const dmg=fighters[selected[0]].dmg;target.hp=Math.max(0,target.hp-(dmg+Math.random()*5));}u.hit=1;}}}
-function sword(u){if(u!==A||u.attack<=0)return;const p=1-u.attack/18;const swing=-0.95+p*1.9;const ang=u.angle+swing;ctx.save();ctx.translate(u.x,u.y);ctx.rotate(ang);ctx.translate(18,-4);ctx.globalAlpha=Math.min(1,u.attack/5,(18-u.attack)/5+0.05);
-ctx.fillStyle="#c8cdd5";ctx.beginPath();ctx.moveTo(-8,-7);ctx.lineTo(145,-4);ctx.lineTo(168,0);ctx.lineTo(145,4);ctx.lineTo(-8,7);ctx.closePath();ctx.fill();ctx.fillStyle="#8b6a3e";ctx.fillRect(-28,-6,20,12);ctx.strokeStyle="#d9dde3";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-9,-13);ctx.lineTo(-9,13);ctx.stroke();ctx.restore();}
-function draw(){ctx.clearRect(0,0,600,600);ctx.fillStyle="#202838";ctx.fillRect(0,0,600,600);ctx.strokeStyle="#687287";ctx.lineWidth=6;ctx.strokeRect(5,5,590,590);ctx.strokeStyle="#ffffff18";ctx.lineWidth=2;for(let i=150;i<600;i+=150){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.moveTo(0,i);ctx.lineTo(600,i);ctx.stroke()}drawBullets();unit(A,fighters[selected[0]]);unit(B,fighters[selected[1]]);drawGun();gunInfo();$("pBar").style.width=Math.max(0,A.hp/A.max*100)+"%";$("eBar").style.width=Math.max(0,B.hp/B.max*100)+"%"}
-function unit(u,f){sword(u);const w=116,h=116,x=u.x-w/2,y=u.y-h/2;ctx.save();ctx.fillStyle="#2b3445";ctx.fillRect(x,y,w,h);const img=(u===A?swordsmanImg:null);if(img&&img.complete&&img.naturalWidth){ctx.drawImage(img,x,y,w,h);}else{ctx.font="86px sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(f.emoji,u.x,u.y);}ctx.restore();ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(Math.max(0,u.hp)),u.x,u.y-68)}
-</script></body></html>
+function start(){
+ reset();running=true;last=performance.now();statusEl.textContent="⚔️ المعركة بدأت!";raf=requestAnimationFrame(loop);
+}
+startBtn.onclick=start;resetBtn.onclick=reset;
+
+function loop(now){
+ if(!running)return;
+ const dt=Math.min(0.035,(now-last)/1000);last=now;
+ update(sword,dt);update(gun,dt);swordAttack(dt);gunAttack(dt);bulletUpdate(dt);bodyCollision();draw();updateUI();
+ if(sword.hp<=0||gun.hp<=0){running=false;statusEl.textContent=sword.hp>0?"🏆 السياف فاز!":"🏆 شخصية المسدس فازت!";return}
+ raf=requestAnimationFrame(loop);
+}
+function update(u,dt){
+ u.x+=u.vx*dt;u.y+=u.vy*dt;
+ const r=u.size/2;
+ if(u.x-r<8){u.x=8+r;u.vx=Math.abs(u.vx)}
+ if(u.x+r>592){u.x=592-r;u.vx=-Math.abs(u.vx)}
+ if(u.y-r<8){u.y=8+r;u.vy=Math.abs(u.vy)}
+ if(u.y+r>592){u.y=592-r;u.vy=-Math.abs(u.vy)}
+}
+function swordAttack(dt){
+ sword.attackCd-=dt;sword.swing=Math.max(0,sword.swing-dt);
+ if(sword.swing<=0&&sword.attackCd<=0){
+  const d=Math.hypot(gun.x-sword.x,gun.y-sword.y);
+  if(d<185){sword.swing=.32;sword.attackCd=1.15;sword.hitDone=false;sword.angle=Math.atan2(gun.y-sword.y,gun.x-sword.x)}
+ }
+ if(sword.swing>0&&!sword.hitDone&&sword.swing<.16){
+  if(Math.hypot(gun.x-sword.x,gun.y-sword.y)<185)gun.hp=Math.max(0,gun.hp-25);
+  sword.hitDone=true;
+ }
+}
+function gunAttack(dt){
+ if(gun.reload>0){gun.reload-=dt;if(gun.reload<=0){gun.reload=0;gun.ammo=4;gun.shotTimer=3.6}return}
+ gun.shotTimer-=dt;
+ if(gun.ammo>0&&gun.shotTimer<=0){
+  const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);
+  bullets.push({x:gun.x+Math.cos(a)*38,y:gun.y+Math.sin(a)*38,vx:Math.cos(a)*520,vy:Math.sin(a)*520,life:1.4});
+  gun.ammo--;gun.shotTimer=gun.ammo>0?3.6:0;
+  if(gun.ammo===0)gun.reload=7;
+ }
+}
+function bulletUpdate(dt){
+ for(const b of bullets){
+  b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
+  if(b.life>0&&Math.hypot(b.x-sword.x,b.y-sword.y)<sword.size/2+7){sword.hp=Math.max(0,sword.hp-22);b.life=0}
+ }
+ bullets=bullets.filter(b=>b.life>0&&b.x>-20&&b.x<620&&b.y>-20&&b.y<620);
+}
+function bodyCollision(){
+ const dx=gun.x-sword.x,dy=gun.y-sword.y,d=Math.hypot(dx,dy)||1,min=60;
+ if(d<min){
+  const nx=dx/d,ny=dy/d,push=(min-d)/2;
+  sword.x-=nx*push;sword.y-=ny*push;gun.x+=nx*push;gun.y+=ny*push;
+  const rv=(gun.vx-sword.vx)*nx+(gun.vy-sword.vy)*ny;
+  if(rv<0){sword.vx+=rv*nx;sword.vy+=rv*ny;gun.vx-=rv*nx;gun.vy-=rv*ny}
+ }
+}
+function updateUI(){
+ hpA.textContent=Math.ceil(sword.hp);hpB.textContent=Math.ceil(gun.hp);
+ barA.style.width=Math.max(0,sword.hp/sword.maxHp*100)+"%";barB.style.width=Math.max(0,gun.hp/gun.maxHp*100)+"%";
+}
+function draw(){
+ ctx.clearRect(0,0,600,600);
+ ctx.fillStyle="#202938";ctx.fillRect(0,0,600,600);
+ ctx.strokeStyle="#657187";ctx.lineWidth=6;ctx.strokeRect(5,5,590,590);
+ ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=2;
+ for(let i=150;i<600;i+=150){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.moveTo(0,i);ctx.lineTo(600,i);ctx.stroke()}
+ for(const b of bullets){ctx.fillStyle="#ffd34d";ctx.beginPath();ctx.arc(b.x,b.y,5,0,Math.PI*2);ctx.fill()}
+ drawSword();drawGun();
+}
+function square(x,y,size,fill){ctx.fillStyle=fill;ctx.fillRect(x-size/2,y-size/2,size,size)}
+function drawSword(){
+ square(sword.x,sword.y,sword.size,"#dfe4eb");
+ ctx.fillStyle="#273140";ctx.fillRect(sword.x-18,sword.y-20,36,42);
+ ctx.fillStyle="#f4c36a";ctx.fillRect(sword.x-10,sword.y-28,20,10);
+ ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(sword.hp),sword.x,sword.y-38);
+ if(sword.swing>0){
+  const p=1-sword.swing/.32,a=sword.angle-1.0+p*2.0;
+  ctx.save();ctx.translate(sword.x,sword.y);ctx.rotate(a);ctx.globalAlpha=.95;
+  ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);
+  ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);ctx.restore();
+ }
+}
+function drawGun(){
+ square(gun.x,gun.y,gun.size,"#2a3445");
+ ctx.save();ctx.translate(gun.x,gun.y);
+ const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);ctx.rotate(a);
+ ctx.fillStyle="#67e34f";ctx.fillRect(-12,-16,46,25);ctx.fillStyle="#55b83d";ctx.fillRect(18,-10,28,12);ctx.fillStyle="#f0a928";ctx.fillRect(-3,8,15,25);ctx.restore();
+ ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(gun.hp),gun.x,gun.y-38);
+ ctx.font="bold 11px system-ui";ctx.fillText(gun.reload>0?"🔄 "+gun.reload.toFixed(1)+"s":"🔫 "+gun.ammo+"/4",gun.x,gun.y+43);
+}
+reset();
+</script>
+</body>
+</html>
