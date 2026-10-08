@@ -265,17 +265,18 @@ function gunAttack(dt){
   if(gun.ammo===0){gun.reload=7;gun.reloadSoundTimer=2;reloadSound()}
  }
 }
-function getBodyRadius(u){
-  return u===sword ? u.size*0.40 : u.size*0.35;
+function getBodyHitbox(u){
+  if(u===sword) return {halfW:u.size*0.31,halfH:u.size*0.46};
+  return {halfW:u.size*0.35,halfH:u.size*0.46};
 }
 function bulletHitsBody(b,u){
-  const rx=getBodyRadius(u), ry=u.size*0.46;
-  const dx=(b.x-u.x)/rx,dy=(b.y-u.y)/ry;
-  return dx*dx+dy*dy<=1;
+  const h=getBodyHitbox(u);
+  return Math.abs(b.x-u.x)<=h.halfW && Math.abs(b.y-u.y)<=h.halfH;
 }
 function bodyDistance(u1,u2){
-  const rx=getBodyRadius(u1)+getBodyRadius(u2), ry=u1.size*.43+u2.size*.43;
-  const dx=(u2.x-u1.x)/rx,dy=(u2.y-u1.y)/ry;
+  const h1=getBodyHitbox(u1),h2=getBodyHitbox(u2);
+  const dx=Math.max(0,Math.abs(u2.x-u1.x)-(h1.halfW+h2.halfW));
+  const dy=Math.max(0,Math.abs(u2.y-u1.y)-(h1.halfH+h2.halfH));
   return Math.hypot(dx,dy);
 }
 function bulletUpdate(dt){
