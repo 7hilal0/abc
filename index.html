@@ -48,13 +48,13 @@ const statusEl=document.getElementById("status");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
 
 const sword={x:145,y:300,vx:170,vy:105,size:90,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0};
-const gun={x:455,y:300,vx:-175,vy:-100,size:90,hp:120,maxHp:120,ammo:4,shotTimer:3.6,reload:0};
+const gun={x:455,y:300,vx:-175,vy:-100,size:90,hp:120,maxHp:120,ammo:4,shotTimer:3.6,reload:0,angle:Math.PI};
 let bullets=[],running=false,last=0,raf=0;
 
 function reset(){
  running=false;cancelAnimationFrame(raf);bullets=[];
  Object.assign(sword,{x:145,y:300,vx:170,vy:105,hp:140,attackCd:0,swing:0,hitDone:false,angle:0});
- Object.assign(gun,{x:455,y:300,vx:-175,vy:-100,hp:120,ammo:4,shotTimer:3.6,reload:0});
+ Object.assign(gun,{x:455,y:300,vx:-175,vy:-100,hp:120,ammo:4,shotTimer:3.6,reload:0,angle:Math.PI});
  updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
 function start(){
@@ -143,7 +143,7 @@ function drawSword(){
 function drawGun(){
  square(gun.x,gun.y,gun.size,"#2a3445");
  ctx.save();ctx.translate(gun.x,gun.y);
- const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);ctx.rotate(a);
+ const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);gun.angle=a;ctx.rotate(a);
  ctx.fillStyle="#67e34f";ctx.fillRect(-20,-22,58,32);ctx.fillStyle="#55b83d";ctx.fillRect(25,-13,34,14);ctx.fillStyle="#f0a928";ctx.fillRect(0,10,18,30);ctx.restore();
  ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(gun.hp),gun.x,gun.y-38);
  ctx.font="bold 11px system-ui";ctx.fillText(gun.reload>0?"🔄 "+gun.reload.toFixed(1)+"s":"🔫 "+gun.ammo+"/4",gun.x,gun.y+43);
