@@ -143,7 +143,8 @@ function loadSavedImages(){
     if(g){customGunImg=new Image();customGunImg.onload=()=>{draw();renderCharacterPreviews()};customGunImg.src=g;} if(sw){customSwordWeaponImg=new Image();customSwordWeaponImg.onload=()=>draw();customSwordWeaponImg.src=sw;}
   }catch(e){}
 }
-function chooseWeaponImage(input){ const file=input.files&&input.files[0]; if(!file||!file.type.startsWith("image/"))return; const reader=new FileReader(); reader.onload=()=>{localStorage.setItem("guyBattleSwordWeaponImage",reader.result); const img=new Image(); img.onload=()=>{customSwordWeaponImg=img;draw()}; img.src=reader.result; input.value="";}; reader.readAsDataURL(file); }\nfunction chooseImage(input,type){
+function chooseWeaponImage(input){ const file=input.files&&input.files[0]; if(!file||!file.type.startsWith("image/"))return; const reader=new FileReader(); reader.onload=()=>{localStorage.setItem("guyBattleSwordWeaponImage",reader.result); const img=new Image(); img.onload=()=>{customSwordWeaponImg=img;draw()}; img.src=reader.result; input.value="";}; reader.readAsDataURL(file); }
+function chooseImage(input,type){
   const file=input.files&&input.files[0];
   if(!file||!file.type.startsWith("image/"))return;
   const reader=new FileReader();
@@ -304,8 +305,7 @@ function drawSword(){
   if(sword.swing>0){
     const p=1-sword.swing/.32,a=sword.angle-1.0+p*2.0;
     ctx.save();ctx.translate(sword.x,sword.y);ctx.rotate(a);ctx.globalAlpha=.95;
-    ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);
-    ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);ctx.restore();
+    if(customSwordWeaponImg&&customSwordWeaponImg.complete&&customSwordWeaponImg.naturalWidth>0){ctx.save();ctx.translate(70,0);ctx.drawImage(customSwordWeaponImg,-70,-70,140,140);ctx.restore();}else{ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);}ctx.restore();
   }
 }
 function drawGun(){
