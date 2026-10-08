@@ -250,7 +250,7 @@ function swordAttack(dt){
   if(d<185){sword.swing=.32;sword.attackCd=1.15;sword.hitDone=false;sword.angle=Math.atan2(gun.y-sword.y,gun.x-sword.x);swordSound()}
  }
  if(sword.swing>0&&!sword.hitDone&&sword.swing<.16){
-  if(Math.hypot(gun.x-sword.x,gun.y-sword.y)<185)gun.hp=Math.max(0,gun.hp-300);
+  if(bodyDistance(sword,gun)<185/Math.max(sword.size,gun.size)*2.0)gun.hp=Math.max(0,gun.hp-300);
   sword.hitDone=true;
  }
 }
@@ -265,10 +265,23 @@ function gunAttack(dt){
   if(gun.ammo===0){gun.reload=7;gun.reloadSoundTimer=2;reloadSound()}
  }
 }
+function getBodyRadius(u){
+  return u===sword ? u.size*0.31 : u.size*0.30;
+}
+function bulletHitsBody(b,u){
+  const rx=getBodyRadius(u), ry=u.size*0.43;
+  const dx=(b.x-u.x)/rx,dy=(b.y-u.y)/ry;
+  return dx*dx+dy*dy<=1;
+}
+function bodyDistance(u1,u2){
+  const rx=getBodyRadius(u1)+getBodyRadius(u2), ry=u1.size*.43+u2.size*.43;
+  const dx=(u2.x-u1.x)/rx,dy=(u2.y-u1.y)/ry;
+  return Math.hypot(dx,dy);
+}
 function bulletUpdate(dt){
  for(const b of bullets){
   b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
-  if(b.life>0&&Math.hypot(b.x-sword.x,b.y-sword.y)<sword.size/2+7){sword.hp=Math.max(0,sword.hp-220);b.life=0}
+  if(b.life>0&&bulletHitsBody(b,sword)){sword.hp=Math.max(0,sword.hp-220);b.life=0}
  }
  bullets=bullets.filter(b=>b.life>0&&b.x>-20&&b.x<620&&b.y>-20&&b.y<620);
 }
