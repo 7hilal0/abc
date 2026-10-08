@@ -19,6 +19,7 @@ canvas{width:100%;height:auto;display:block;background:#202938;border:5px solid 
 button{border:0;border-radius:13px;padding:12px 20px;background:#57e389;color:#07110a;font-weight:900;font-size:17px}
 button:active{transform:scale(.98)}
 .hint{text-align:center;color:#aeb7c6;margin:10px 0;font-size:14px}
+.image-controls button{background:#2b3546;color:#fff;border:1px solid #455268;font-size:14px;padding:10px 14px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .panel{background:#222b39;border-radius:12px;padding:10px}
 .panel b{display:block;margin-bottom:6px}
@@ -37,6 +38,13 @@ button:active{transform:scale(.98)}
 <div class="panel"><b>🔫 المسدس — <span id="hpB">120</span></b><div class="hp"><div id="barB" class="bar"></div></div></div>
 </div>
 <div class="controls"><button id="start">ابدأ المعركة</button><button id="reset">إعادة</button></div>
+<div class="controls image-controls">
+  <button id="pickSword" type="button">🖼️ صورة السياف</button>
+  <button id="pickGun" type="button">🖼️ صورة المسدد</button>
+  <input id="swordFile" type="file" accept="image/*" hidden>
+  <input id="gunFile" type="file" accept="image/*" hidden>
+</div>
+<p class="hint">اختر صورة لكل شخصية من هاتفك. الصور تُحفظ محلياً في هذا المتصفح ولا تُرفع إلى الخادم.</p>
 <p class="hint">السياف: ضربة سيف. المسدس: 4 طلقات، كل طلقة بعد 3.6 ثوانٍ، ثم إعادة تعبئة 7 ثوانٍ.</p>
 </section></main>
 <script>
@@ -46,6 +54,38 @@ const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB");
 const barA=document.getElementById("barA"),barB=document.getElementById("barB");
 const statusEl=document.getElementById("status");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
+const pickSword=document.getElementById("pickSword"),pickGun=document.getElementById("pickGun");
+const swordFile=document.getElementById("swordFile"),gunFile=document.getElementById("gunFile");
+let customSwordImg=null,customGunImg=null;
+
+function loadSavedImages(){
+  try{
+    const s=localStorage.getItem("guyBattleSwordImage");
+    const g=localStorage.getItem("guyBattleGunImage");
+    if(s){customSwordImg=new Image();customSwordImg.onload=()=>draw();customSwordImg.src=s;}
+    if(g){customGunImg=new Image();customGunImg.onload=()=>draw();customGunImg.src=g;}
+  }catch(e){}
+}
+function chooseImage(input,type){
+  const file=input.files&&input.files[0];
+  if(!file||!file.type.startsWith("image/"))return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      if(type==="sword"){customSwordImg=img;try{localStorage.setItem("guyBattleSwordImage",reader.result)}catch(e){}}
+      else{customGunImg=img;try{localStorage.setItem("guyBattleGunImage",reader.result)}catch(e){}}
+      draw();
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+  input.value="";
+}
+pickSword.onclick=()=>swordFile.click();
+pickGun.onclick=()=>gunFile.click();
+swordFile.onchange=()=>chooseImage(swordFile,"sword");
+gunFile.onchange=()=>chooseImage(gunFile,"gun");
 
 const knightImg=new Image();knightImg.src="data:image/webp;base64,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";
 const sword={x:145,y:300,vx:170,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0};
@@ -136,8 +176,9 @@ function drawSword(){
   ctx.beginPath();
   ctx.rect(sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
   ctx.clip();
-  if(knightImg.complete&&knightImg.naturalWidth>0){
-    ctx.drawImage(knightImg,sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
+  const img=customSwordImg||knightImg;
+  if(img.complete&&img.naturalWidth>0){
+    ctx.drawImage(img,sword.x-sword.size/2,sword.y-sword.size/2,sword.size,sword.size);
   }else{
     square(sword.x,sword.y,sword.size,"#dfe4eb");
     ctx.fillStyle="#273140";ctx.fillRect(sword.x-22,sword.y-25,44,50);
@@ -153,13 +194,23 @@ function drawSword(){
   }
 }
 function drawGun(){
- square(gun.x,gun.y,gun.size,"#2a3445");
+ if(customGunImg&&customGunImg.complete&&customGunImg.naturalWidth>0){
+   ctx.save();
+   ctx.beginPath();
+   ctx.rect(gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
+   ctx.clip();
+   ctx.drawImage(customGunImg,gun.x-gun.size/2,gun.y-gun.size/2,gun.size,gun.size);
+   ctx.restore();
+ }else{
+   square(gun.x,gun.y,gun.size,"#2a3445");
  ctx.save();ctx.translate(gun.x,gun.y);
  const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);gun.angle=a;ctx.rotate(a);
  ctx.fillStyle="#67e34f";ctx.fillRect(-20,-22,58,32);ctx.fillStyle="#55b83d";ctx.fillRect(25,-13,34,14);ctx.fillStyle="#f0a928";ctx.fillRect(0,10,18,30);ctx.restore();
+ }
  ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(gun.hp),gun.x,gun.y-38);
  ctx.font="bold 11px system-ui";ctx.fillText(gun.reload>0?"🔄 "+gun.reload.toFixed(1)+"s":"🔫 "+gun.ammo+"/4",gun.x,gun.y+43);
 }
+loadSavedImages();
 reset();
 </script>
 </body>
