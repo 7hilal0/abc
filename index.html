@@ -254,7 +254,7 @@ function loop(now){
  if(selectedChars.has("ghost"))updateGhost(dt);
  if(selectedChars.has("sword"))swordAttack(dt);
  if(selectedChars.has("gun"))gunAttack(dt);
- if(selectedChars.has("gun")&&selectedChars.has("sword"))bulletUpdate(dt);
+ if(selectedChars.has("gun"))bulletUpdate(dt);
  if(selectedChars.has("gun")&&selectedChars.has("sword"))bodyCollision();
  draw();updateUI();
  const loser=activeUnits().find(u=>u.hp<=0);
