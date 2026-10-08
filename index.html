@@ -103,8 +103,8 @@ const battleBtn=document.getElementById("battleBtn"),backCharacters=document.get
 const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview");
 let swordFrontSide="left";
 let gunFrontSide="left";
-let swordSize=150;
-let gunSize=150;
+let swordSize=160;
+let gunSize=160;
 let swordMaxHp=1000;
 let gunMaxHp=1000;
 try{
@@ -295,7 +295,7 @@ function drawSword(){
     ctx.fillStyle="#f4c36a";ctx.fillRect(sword.x-10,sword.y-28,20,10);
   }
   ctx.restore();
-  ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(sword.hp),sword.x,sword.y-58);
+  ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(sword.hp),sword.x,sword.y-sword.size/2-18);
   if(sword.swing>0){
     const p=1-sword.swing/.32,a=sword.angle-1.0+p*2.0;
     ctx.save();ctx.translate(sword.x,sword.y);ctx.rotate(a);ctx.globalAlpha=.95;
@@ -319,7 +319,7 @@ function drawGun(){
  const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);gun.angle=a;ctx.rotate(a);
  ctx.fillStyle="#67e34f";ctx.fillRect(-20,-22,58,32);ctx.fillStyle="#55b83d";ctx.fillRect(25,-13,34,14);ctx.fillStyle="#f0a928";ctx.fillRect(0,10,18,30);ctx.restore();
  }
- ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(gun.hp),gun.x,gun.y-38);
+ ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";ctx.fillText(Math.ceil(gun.hp),gun.x,gun.y-gun.size/2-18);
  ctx.font="bold 11px system-ui";ctx.fillText(gun.reload>0?"🔄 "+gun.reload.toFixed(1)+"s":"🔫 "+gun.ammo+"/4",gun.x,gun.y+43);
 }
 loadSavedImages();
