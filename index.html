@@ -76,7 +76,7 @@ button:active{transform:scale(.98)}
 <div id="settingsModal" class="settings-modal" hidden>
   <div class="settings-box">
     <div class="settings-head"><b id="settingsTitle">إعدادات الشخصية</b><button id="closeSettings" type="button">✕</button></div>
-    <div class="settings-row"><span>الصورة</span><button id="settingsImage" type="button">🖼️ تغيير الصورة</button></div>
+    <div class="settings-row"><span id="settingsCharacterImageLabel">صورة السياف</span><button id="settingsImage" type="button">🖼️ تغيير الصورة</button></div><div class="settings-row" id="swordOnlyRow"><span>صورة السيف</span><button id="settingsSwordImage" type="button">⚔️ تغيير صورة السيف</button></div>
     <div class="settings-row"><span>الاتجاه الأمامي</span><div><button id="settingsLeft" type="button">← يسار</button><button id="settingsRight" type="button">يمين →</button></div></div>
     <div class="settings-row"><span>حجم الشخصية</span><input id="settingsSize" type="range" min="120" max="120" step="1"></div>
     <div class="settings-row"><span>الحياة</span><input id="settingsHp" type="number" min="1" max="999"></div>
@@ -116,12 +116,12 @@ let swordMaxHp=1000;
 let gunMaxHp=1000;
 let settingsType="sword";
 const settingsModal=document.getElementById("settingsModal"),settingsTitle=document.getElementById("settingsTitle");
-const settingsImage=document.getElementById("settingsImage"),settingsLeft=document.getElementById("settingsLeft"),settingsRight=document.getElementById("settingsRight");
+const settingsImage=document.getElementById("settingsImage"),settingsSwordImage=document.getElementById("settingsSwordImage"),settingsCharacterImageLabel=document.getElementById("settingsCharacterImageLabel"),settingsLeft=document.getElementById("settingsLeft"),settingsRight=document.getElementById("settingsRight");
 const settingsSize=document.getElementById("settingsSize"),settingsHp=document.getElementById("settingsHp");
 const closeSettings=document.getElementById("closeSettings"),saveSettings=document.getElementById("saveSettings");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
-const swordFile=document.getElementById("swordFile"),gunFile=document.getElementById("gunFile");
-let customSwordImg=null,customGunImg=null;
+const swordFile=document.getElementById("swordFile"),swordImageFile=document.createElement("input"),gunFile=document.getElementById("gunFile");
+let customSwordImg=null,customGunImg=null,customSwordWeaponImg=null; swordImageFile.type="file"; swordImageFile.accept="image/*"; swordImageFile.hidden=true; document.body.appendChild(swordImageFile);
 
 function renderCharacterPreviews(){
   swordPreview.innerHTML="";gunPreview.innerHTML="";
@@ -137,13 +137,13 @@ function showBattle(){
 }
 function loadSavedImages(){
   try{
-    const s=localStorage.getItem("guyBattleSwordImage");
+    const s=localStorage.getItem("guyBattleSwordImage"); const sw=localStorage.getItem("guyBattleSwordWeaponImage");
     const g=localStorage.getItem("guyBattleGunImage");
     if(s){customSwordImg=new Image();customSwordImg.onload=()=>{draw();renderCharacterPreviews()};customSwordImg.src=s;}
-    if(g){customGunImg=new Image();customGunImg.onload=()=>{draw();renderCharacterPreviews()};customGunImg.src=g;}
+    if(g){customGunImg=new Image();customGunImg.onload=()=>{draw();renderCharacterPreviews()};customGunImg.src=g;} if(sw){customSwordWeaponImg=new Image();customSwordWeaponImg.onload=()=>draw();customSwordWeaponImg.src=sw;}
   }catch(e){}
 }
-function chooseImage(input,type){
+function chooseWeaponImage(input){ const file=input.files&&input.files[0]; if(!file||!file.type.startsWith("image/"))return; const reader=new FileReader(); reader.onload=()=>{localStorage.setItem("guyBattleSwordWeaponImage",reader.result); const img=new Image(); img.onload=()=>{customSwordWeaponImg=img;draw()}; img.src=reader.result; input.value="";}; reader.readAsDataURL(file); }\nfunction chooseImage(input,type){
   const file=input.files&&input.files[0];
   if(!file||!file.type.startsWith("image/"))return;
   const reader=new FileReader();
@@ -161,14 +161,14 @@ function chooseImage(input,type){
 }
 function openSettings(type){
   settingsType=type;
-  settingsTitle.textContent=type==="sword"?"⚔️ إعدادات السياف":"🔫 إعدادات المسدد";
+  settingsTitle.textContent=type==="sword"?"⚔️ إعدادات السياف":"🔫 إعدادات المسدد"; settingsCharacterImageLabel.textContent=type==="sword"?"صورة السياف":"صورة المسدد"; settingsSwordImage.parentElement.style.display=type==="sword"?"flex":"none";
   settingsSize.value=type==="sword"?swordSize:gunSize;
   settingsHp.value=type==="sword"?swordMaxHp:gunMaxHp;
   settingsModal.hidden=false;
 }
 editSword.onclick=()=>openSettings("sword");
 editGun.onclick=()=>openSettings("gun");
-settingsImage.onclick=()=>{(settingsType==="sword"?swordFile:gunFile).click()};
+settingsImage.onclick=()=>{(settingsType==="sword"?swordFile:gunFile).click()}; settingsSwordImage.onclick=()=>swordImageFile.click(); swordImageFile.onchange=()=>chooseWeaponImage(swordImageFile);
 settingsLeft.onclick=()=>{if(settingsType==="sword")swordFrontSide="left";else gunFrontSide="left"};
 settingsRight.onclick=()=>{if(settingsType==="sword")swordFrontSide="right";else gunFrontSide="right"};
 closeSettings.onclick=()=>settingsModal.hidden=true;
