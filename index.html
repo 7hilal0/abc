@@ -78,7 +78,7 @@ button:active{transform:scale(.98)}
     <div class="settings-head"><b id="settingsTitle">إعدادات الشخصية</b><button id="closeSettings" type="button">✕</button></div>
     <div class="settings-row"><span>الصورة</span><button id="settingsImage" type="button">🖼️ تغيير الصورة</button></div>
     <div class="settings-row"><span>الاتجاه الأمامي</span><div><button id="settingsLeft" type="button">← يسار</button><button id="settingsRight" type="button">يمين →</button></div></div>
-    <div class="settings-row"><span>حجم الشخصية</span><input id="settingsSize" type="range" min="60" max="150" step="5"></div>
+    <div class="settings-row"><span>حجم الشخصية</span><input id="settingsSize" type="range" min="120" max="120" step="1"></div>
     <div class="settings-row"><span>الحياة</span><input id="settingsHp" type="number" min="1" max="999"></div>
     <button id="saveSettings" class="battle-btn" type="button">حفظ الإعدادات</button>
   </div>
@@ -110,8 +110,8 @@ const frontSwordLeft=document.getElementById("frontSwordLeft"),frontSwordRight=d
 const frontGunLeft=document.getElementById("frontGunLeft"),frontGunRight=document.getElementById("frontGunRight");
 let swordFrontSide=localStorage.getItem("guyBattleSwordFrontSide")||"right";
 let gunFrontSide=localStorage.getItem("guyBattleGunFrontSide")||"right";
-let swordSize=Number(localStorage.getItem("guyBattleSwordSize"))||100;
-let gunSize=Number(localStorage.getItem("guyBattleGunSize"))||100;
+let swordSize=150;
+let gunSize=150;
 let swordMaxHp=Number(localStorage.getItem("guyBattleSwordHp"))||140;
 let gunMaxHp=Number(localStorage.getItem("guyBattleGunHp"))||120;
 let settingsType="sword";
