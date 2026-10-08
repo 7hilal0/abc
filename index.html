@@ -63,6 +63,10 @@ button:active{transform:scale(.98)}
       <div class="char-preview" id="gunPreview"></div>
       <div class="char-info"><b>🔫 المسدد</b><span>مسدس • 1000 HP</span></div>
     </div>
+    <div class="character-card">
+      <div class="char-preview" id="ghostPreview"></div>
+      <div class="char-info"><b>👻 الشبح</b><span>امتصاص • 10000 HP</span></div>
+    </div>
   </div>
   <button id="battleBtn" class="battle-btn" type="button">⚔️ ابدأ المعركة</button>
 </section>
@@ -118,7 +122,7 @@ const barA=document.getElementById("barA"),barB=document.getElementById("barB");
 const statusEl=document.getElementById("status");
 const characterPage=document.getElementById("characterPage"),battlePage=document.getElementById("battlePage");
 const battleBtn=document.getElementById("battleBtn"),backCharacters=document.getElementById("backCharacters");
-const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview");
+const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview"),ghostPreview=document.getElementById("ghostPreview");
 let swordFrontSide="left";
 let gunFrontSide="left";
 let swordSize=160;
@@ -141,11 +145,12 @@ const swordFile=document.getElementById("swordFile"),swordImageFile=document.cre
 let customSwordImg=null,customGunImg=null,customSwordWeaponImg=null; swordImageFile.type="file"; swordImageFile.accept="image/*"; swordImageFile.hidden=true; document.body.appendChild(swordImageFile);
 
 function renderCharacterPreviews(){
-  swordPreview.innerHTML="";gunPreview.innerHTML="";
+  swordPreview.innerHTML="";gunPreview.innerHTML="";ghostPreview.innerHTML="";
   const si=customSwordImg||knightImg;
   const gi=customGunImg||defaultGunImg;
   if(si.complete&&si.naturalWidth>0){const im=document.createElement("img");im.src=si.src;swordPreview.appendChild(im)}else swordPreview.textContent="⚔️";
   if(gi.complete&&gi.naturalWidth>0){const im=document.createElement("img");im.src=gi.src;gunPreview.appendChild(im)}else gunPreview.textContent="🔫";
+  if(ghostImg.complete&&ghostImg.naturalWidth>0){const im=document.createElement("img");im.src=ghostImg.src;ghostPreview.appendChild(im)}else ghostPreview.textContent="👻";
 }
 function showCharacters(){
   running=false;cancelAnimationFrame(raf);characterPage.hidden=false;battlePage.hidden=true;renderCharacterPreviews();
@@ -202,9 +207,11 @@ gunFile.onchange=()=>chooseImage(gunFile,"gun");
 
 const knightImg=new Image();knightImg.src="1000085677.png";
 const defaultGunImg=new Image();defaultGunImg.src="1000085688.png";
+const ghostImg=new Image();ghostImg.src="1000085704 (1).png";
 const defaultSwordWeaponImg=new Image();defaultSwordWeaponImg.src="b8468d8cbb01d020bc";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
 const sword={x:145,y:300,vx:175,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0,wallBoost:0};
 const gun={x:455,y:300,vx:-190,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:1.5,reload:0,reloadSoundTimer:0,angle:Math.PI};
+const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:10000,maxHp:10000,angle:0,absorb:0};
 let bullets=[],running=false,last=0,raf=0;
 
 function reset(){
@@ -213,6 +220,7 @@ function reset(){
  let b=a+Math.PI+(Math.random()-.5)*1.4;
  Object.assign(sword,{x:145,y:300,vx:175*Math.cos(a),vy:175*Math.sin(a),size:swordSize,maxHp:swordMaxHp,hp:swordMaxHp,attackCd:0,swing:0,hitDone:false,angle:Math.atan2(300-300,455-145),wallBoost:0});
  Object.assign(gun,{x:455,y:300,vx:190*Math.cos(b),vy:190*Math.sin(b),size:gunSize,maxHp:gunMaxHp,hp:gunMaxHp,ammo:4,shotTimer:1.5,reload:0,angle:Math.atan2(300-300,145-455)});
+ Object.assign(ghost,{x:300,y:100,vx:115,vy:90,size:120,hp:10000,maxHp:10000,absorb:0});
  updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
 function start(){
@@ -223,8 +231,8 @@ startBtn.onclick=start;resetBtn.onclick=reset;
 function loop(now){
  if(!running)return;
  const dt=Math.min(0.035,(now-last)/1000);last=now;
- update(sword,dt);update(gun,dt);swordAttack(dt);gunAttack(dt);bulletUpdate(dt);bodyCollision();draw();updateUI();
- if(sword.hp<=0||gun.hp<=0){running=false;statusEl.textContent=sword.hp>0?"🏆 السياف فاز!":"🏆 شخصية المسدس فازت!";return}
+ update(sword,dt);update(gun,dt);updateGhost(dt);swordAttack(dt);gunAttack(dt);bulletUpdate(dt);bodyCollision();draw();updateUI();
+ if(sword.hp<=0||gun.hp<=0||ghost.hp<=0){running=false;statusEl.textContent=ghost.hp>0&&ghost.hp>=sword.hp&&ghost.hp>=gun.hp?"🏆 الشبح فاز!":sword.hp>0?"🏆 السياف فاز!":"🏆 شخصية المسدس فازت!";return}
  raf=requestAnimationFrame(loop);
 }
 function update(u,dt){
@@ -241,6 +249,24 @@ function update(u,dt){
  if(u===sword && u.wallBoost>0){
    u.wallBoost=Math.max(0,u.wallBoost-dt);
    if(u.wallBoost<=0){const s=Math.hypot(u.vx,u.vy)||1;u.vx=u.vx/s*175;u.vy=u.vy/s*175;}
+ }
+}
+function updateGhost(dt){
+ const targets=[sword,gun].filter(u=>u.hp>0);
+ if(!targets.length)return;
+ let target=targets[0],dist=Math.hypot(target.x-ghost.x,target.y-ghost.y);
+ for(const u of targets){const d=Math.hypot(u.x-ghost.x,u.y-ghost.y);if(d<dist){dist=d;target=u}}
+ const dx=target.x-ghost.x,dy=target.y-ghost.y,d=Math.hypot(dx,dy)||1;
+ ghost.vx=dx/d*145;ghost.vy=dy/d*145;ghost.x+=ghost.vx*dt;ghost.y+=ghost.vy*dt;
+ ghost.x=Math.max(ghost.size/2+8,Math.min(592-ghost.size/2,ghost.x));
+ ghost.y=Math.max(ghost.size/2+8,Math.min(592-ghost.size/2,ghost.y));
+ ghost.angle=Math.atan2(dy,dx);
+ // The ghost phases through bodies and absorbs health while a target is inside its center.
+ for(const u of targets){
+  if(Math.abs(u.x-ghost.x)<ghost.size*.27&&Math.abs(u.y-ghost.y)<ghost.size*.27){
+   const drain=Math.min(u.hp,180*dt);
+   u.hp-=drain;ghost.hp=Math.min(ghost.maxHp,ghost.hp+drain);
+  }
  }
 }
 function swordAttack(dt){
@@ -329,7 +355,7 @@ function draw(){
  ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=2;
  for(let i=150;i<600;i+=150){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.moveTo(0,i);ctx.lineTo(600,i);ctx.stroke()}
  for(const b of bullets){ctx.fillStyle="#ffd34d";ctx.beginPath();ctx.arc(b.x,b.y,5,0,Math.PI*2);ctx.fill()}
- drawSword();drawGun();
+ drawSword();drawGun();drawGhost();
 }
 function square(x,y,size,fill){ctx.fillStyle=fill;ctx.fillRect(x-size/2,y-size/2,size,size)}
 function drawSword(){
@@ -371,6 +397,19 @@ function drawSword(){
     ctx.save();ctx.translate(sword.x,sword.y);ctx.rotate(a);ctx.globalAlpha=.95;
     if((customSwordWeaponImg||defaultSwordWeaponImg).complete&&(customSwordWeaponImg||defaultSwordWeaponImg).naturalWidth>0){ctx.save();ctx.translate(70,-8);ctx.drawImage(customSwordWeaponImg,-63.5,-63.5,127,127);ctx.restore();}else{ctx.fillStyle="#d9dde3";ctx.fillRect(18,-4,125,8);ctx.fillStyle="#8b6a3e";ctx.fillRect(2,-6,24,12);}ctx.restore();
   }
+}
+function drawGhost(){
+ ctx.save();
+ ctx.globalAlpha=.82;
+ if(ghostImg.complete&&ghostImg.naturalWidth>0){
+  ctx.drawImage(ghostImg,ghost.x-ghost.size/2,ghost.y-ghost.size/2,ghost.size,ghost.size);
+ }else{
+  ctx.fillStyle="#77e8ff";ctx.beginPath();ctx.arc(ghost.x,ghost.y,ghost.size*.38,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle="#102333";ctx.beginPath();ctx.arc(ghost.x-12,ghost.y-5,5,0,Math.PI*2);ctx.arc(ghost.x+12,ghost.y-5,5,0,Math.PI*2);ctx.fill();
+ }
+ ctx.restore();
+ ctx.fillStyle="#fff";ctx.font="bold 12px system-ui";ctx.textAlign="center";
+ ctx.fillText("👻 "+Math.ceil(ghost.hp),ghost.x,ghost.y-ghost.size/2-18);
 }
 function drawGun(){
  if((customGunImg||defaultGunImg).complete&&(customGunImg||defaultGunImg).naturalWidth>0){
