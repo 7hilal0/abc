@@ -98,7 +98,7 @@ button:active{transform:scale(.98)}
 </section></main>
 <script>
 "use strict";
-const canvas=document.getElementById("arena"),ctx=canvas.getContext("2d");const swordHitAudio=new Audio("mixkit-metal-hit-woosh-1485.wav");swordHitAudio.preload="auto";const reloadAudio=new Audio("mixkit-shotgun-pump-1659.wav");reloadAudio.preload="auto";function playSwordHit(){try{swordHitAudio.currentTime=0;swordHitAudio.play().catch(()=>{})}catch(e){}}function playReload(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}let audioCtx=null;function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}}function tone(freq,dur,gain,type="square"){ensureAudio();if(!audioCtx)return;const t=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.45),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur)}function gunshotSound(){tone(110,.16,.32,"square")}function reloadSound(){playReload()}function swordSound(){playSwordHit()}
+const canvas=document.getElementById("arena"),ctx=canvas.getContext("2d");const swordHitAudio=new Audio("mixkit-metal-hit-woosh-1485.wav");swordHitAudio.preload="auto";const reloadAudio=new Audio("mixkit-shotgun-pump-1659.wav");reloadAudio.preload="auto";function playSwordHit(){try{swordHitAudio.currentTime=0;swordHitAudio.play().catch(()=>{})}catch(e){}}function playReload(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}let audioCtx=null;function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}}function tone(freq,dur,gain,type="square"){ensureAudio();if(!audioCtx)return;const t=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.45),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur)}function gunshotSound(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}function reloadSound(){tone(85,.22,.18,"sawtooth")}function swordSound(){playSwordHit()}
 const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB");
 const barA=document.getElementById("barA"),barB=document.getElementById("barB");
 const statusEl=document.getElementById("status");
@@ -200,7 +200,7 @@ function reset(){
  const a=Math.random()*Math.PI*2;
  let b=a+Math.PI+(Math.random()-.5)*1.4;
  Object.assign(sword,{x:145,y:300,vx:175*Math.cos(a),vy:175*Math.sin(a),size:swordSize,maxHp:swordMaxHp,hp:swordMaxHp,attackCd:0,swing:0,hitDone:false,angle:Math.atan2(300-300,455-145),wallBoost:0});
- Object.assign(gun,{x:455,y:300,vx:190*Math.cos(b),vy:190*Math.sin(b),size:gunSize,maxHp:gunMaxHp,hp:gunMaxHp,ammo:4,shotTimer:0.5,reload:0,angle:Math.atan2(300-300,145-455)});
+ Object.assign(gun,{x:455,y:300,vx:190*Math.cos(b),vy:190*Math.sin(b),size:gunSize,maxHp:gunMaxHp,hp:gunMaxHp,ammo:4,shotTimer:1.5,reload:0,angle:Math.atan2(300-300,145-455)});
  updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
 function start(){
@@ -248,8 +248,8 @@ function gunAttack(dt){
  if(gun.ammo>0&&gun.shotTimer<=0){
   const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);
   bullets.push({x:gun.x+Math.cos(a)*38,y:gun.y+Math.sin(a)*38,vx:Math.cos(a)*520,vy:Math.sin(a)*520,life:1.4});
-  gun.ammo--;gun.shotTimer=gun.ammo>0?0.5:0;
-  if(gun.ammo===0)gun.reload=5;
+  gun.ammo--;gun.shotTimer=gun.ammo>0?1.5:0;
+  if(gun.ammo===0){gun.reload=7;gun.reloadSoundTimer=2;reloadSound()}
  }
 }
 function bulletUpdate(dt){
