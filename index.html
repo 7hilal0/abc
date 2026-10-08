@@ -247,7 +247,7 @@ function swordAttack(dt){
  sword.attackCd-=dt;sword.swing=Math.max(0,sword.swing-dt);
  if(sword.swing<=0&&sword.attackCd<=0){
   const d=Math.hypot(gun.x-sword.x,gun.y-sword.y);
-  if(d<185){sword.swing=.32;sword.attackCd=1.15;sword.hitDone=false;sword.angle=Math.atan2(gun.y-sword.y,gun.x-sword.x);swordSound()}
+  if(d<185){sword.swing=.32;sword.attackCd=1.80;sword.hitDone=false;sword.angle=Math.atan2(gun.y-sword.y,gun.x-sword.x);swordSound()}
  }
  if(sword.swing>0&&!sword.hitDone&&sword.swing<.16){
   if(bodyDistance(sword,gun)<185/Math.max(sword.size,gun.size)*2.0)gun.hp=Math.max(0,gun.hp-300);
