@@ -22,7 +22,7 @@ button:active{transform:scale(.98)}
 .image-controls button{background:#2b3546;color:#fff;border:1px solid #455268;font-size:14px;padding:10px 14px}
 .select-title{text-align:center;margin:8px 0 18px}
 .characters{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.character-card{position:relative;background:#222b39;border:1px solid #39465a;border-radius:16px;padding:12px;min-width:0}
+.character-card{position:relative;background:#222b39;border:1px solid #39465a;border-radius:16px;padding:12px;min-width:0}.character-card.selected{border:2px solid #57e389;box-shadow:0 0 0 2px #57e38922}.pick-btn{display:block;width:100%;margin-top:8px;padding:9px 8px;font-size:14px;background:#2b3546;color:#fff;border:1px solid #455268}.character-card.selected .pick-btn{background:#57e389;color:#07110a;border-color:#57e389}
 .char-preview{width:100%;aspect-ratio:1/1;background:#151b25;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:56px}
 .char-preview img{width:100%;height:100%;object-fit:cover;display:block}
 .char-info{text-align:center;padding:10px 4px 2px}
@@ -45,7 +45,7 @@ button:active{transform:scale(.98)}
 .panel{background:#222b39;border-radius:12px;padding:10px}
 .panel b{display:block;margin-bottom:6px}
 .hp{height:10px;background:#343e4e;border-radius:20px;overflow:hidden}
-.bar{height:100%;background:#57e389;width:100%}.ghost-bar{background:#78e6ff}
+.bar{height:100%;background:#57e389;width:100%}
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.stats-card{background:#222b39;border:1px solid #39465a;border-radius:12px;padding:12px}.stats-card h3{margin:0 0 8px;font-size:16px}.stats-card p{margin:5px 0;color:#c8d0dc;font-size:13px;line-height:1.5}.stats-card strong{color:#fff}.stats-card .live{color:#57e389;font-weight:900}@media(max-width:520px){.stats-grid{grid-template-columns:1fr 1fr;gap:6px}.stats-card{padding:8px}.stats-card h3{font-size:14px}.stats-card p{font-size:11px;margin:4px 0}}\n@media(max-width:520px){h1{font-size:24px}.card{padding:9px}}
 
 /* Arena visual upgrade */
@@ -59,17 +59,20 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
 <section id="characterPage" class="card">
   <h2 class="select-title">اختار شخصيات المعركة</h2>
   <div class="characters">
-    <div class="character-card">
+    <div class="character-card" id="cardSword">
       <div class="char-preview" id="swordPreview"></div>
       <div class="char-info"><b>⚔️ السياف</b><span>سيف • 1000 HP</span></div>
+      <button class="pick-btn" id="pickSword" type="button">✓ اختيار</button>
     </div>
-    <div class="character-card">
+    <div class="character-card" id="cardGun">
       <div class="char-preview" id="gunPreview"></div>
       <div class="char-info"><b>🔫 المسدد</b><span>مسدس • 1000 HP</span></div>
+      <button class="pick-btn" id="pickGun" type="button">✓ اختيار</button>
     </div>
-    <div class="character-card">
+    <div class="character-card" id="cardGhost">
       <div class="char-preview" id="ghostPreview"></div>
-      <div class="char-info"><b>👻 الشبح</b><span>امتصاص • 10000 HP</span></div>
+      <div class="char-info"><b>👻 الشبح</b><span>امتصاص • 1000 HP</span></div>
+      <button class="pick-btn" id="pickGhost" type="button">✓ اختيار</button>
     </div>
   </div>
   <button id="battleBtn" class="battle-btn" type="button">⚔️ ابدأ المعركة</button>
@@ -90,13 +93,13 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
 <div id="wrap"><canvas id="arena" width="600" height="600"></canvas></div>
 <p id="status" class="hint">السياف والمسدد يتحركان تلقائياً داخل الحلبة.</p>
 <div class="grid">
-<div class="panel"><b>⚔️ السياف — <span id="hpA">1000</span></b><div class="hp"><div id="barA" class="bar"></div></div></div>
-<div class="panel"><b>🔫 المسدس — <span id="hpB">1000</span></b><div class="hp"><div id="barB" class="bar"></div></div></div>
-<div class="panel"><b>👻 الشبح — <span id="hpGhost">10000</span></b><div class="hp"><div id="barGhost" class="bar ghost-bar"></div></div><small style="color:#aeb7c6">القدرة: يخترق الشخصيات ويمتص صحتها</small></div>
+<div class="panel" id="panelSword"><b>⚔️ السياف — <span id="hpA">1000</span></b><div class="hp"><div id="barA" class="bar"></div></div></div>
+<div class="panel" id="panelGun"><b>🔫 المسدس — <span id="hpB">1000</span></b><div class="hp"><div id="barB" class="bar"></div></div></div>
+<div class="panel" id="panelGhost"><b>👻 الشبح — <span id="hpGhost">1000</span></b><div class="hp"><div id="barGhost" class="bar"></div></div><small style="color:#aeb7c6">القدرة: يخترق الشخصيات ويمتص صحتها</small></div>
 </div>
 <div class="controls"><button id="start">ابدأ</button><button id="reset">إعادة</button><button id="backCharacters">👥 الشخصيات</button></div>
 <div class="stats-grid">
-  <div class="stats-card">
+  <div class="stats-card" id="statsSword">
     <h3>⚔️ السياف</h3>
     <p>❤️ الهيلث: <strong id="statSwordHp">1000 / 1000</strong></p>
     <p>⚡ السرعة: <strong id="statSwordSpeed">175</strong></p>
@@ -104,7 +107,7 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
     <p>🗡️ المدى: <strong>185</strong></p>
     <p>✨ القدرة: <strong>ضربة سيف قريبة</strong></p>
   </div>
-  <div class="stats-card">
+  <div class="stats-card" id="statsGun">
     <h3>🔫 المسدد</h3>
     <p>❤️ الهيلث: <strong id="statGunHp">1000 / 1000</strong></p>
     <p>⚡ السرعة: <strong id="statGunSpeed">190</strong></p>
@@ -127,6 +130,13 @@ const barA=document.getElementById("barA"),barB=document.getElementById("barB"),
 const statusEl=document.getElementById("status");
 const characterPage=document.getElementById("characterPage"),battlePage=document.getElementById("battlePage");
 const battleBtn=document.getElementById("battleBtn"),backCharacters=document.getElementById("backCharacters");
+const selectable={sword:document.getElementById("pickSword"),gun:document.getElementById("pickGun"),ghost:document.getElementById("pickGhost")};
+const selectedChars=new Set(["sword","gun"]);
+function activeUnits(){return [...selectedChars].map(k=>({sword,gun,ghost}[k]));}
+function opponentOf(u){return activeUnits().find(v=>v!==u)||null;}
+function refreshSelection(){for(const k of ["sword","gun","ghost"]){const card=document.getElementById("card"+k[0].toUpperCase()+k.slice(1));const chosen=selectedChars.has(k);card.classList.toggle("selected",chosen);selectable[k].textContent=chosen?"✓ مختارة":"＋ اخترها";selectable[k].disabled=!chosen&&selectedChars.size>=2;}}
+for(const k of ["sword","gun","ghost"]){selectable[k].onclick=()=>{if(selectedChars.has(k)){if(selectedChars.size<=1)return;selectedChars.delete(k)}else{if(selectedChars.size>=2)return;selectedChars.add(k)}refreshSelection();};}
+
 const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview"),ghostPreview=document.getElementById("ghostPreview");
 let swordFrontSide="left";
 let gunFrontSide="left";
@@ -161,7 +171,11 @@ function showCharacters(){
   running=false;cancelAnimationFrame(raf);characterPage.hidden=false;battlePage.hidden=true;renderCharacterPreviews();
 }
 function showBattle(){
-  characterPage.hidden=true;battlePage.hidden=false;reset();
+  if(selectedChars.size!==2)return;
+  characterPage.hidden=true;battlePage.hidden=false;
+  document.getElementById("panelSword").hidden=!selectedChars.has("sword");document.getElementById("panelGun").hidden=!selectedChars.has("gun");document.getElementById("panelGhost").hidden=!selectedChars.has("ghost");
+  document.getElementById("statsSword").hidden=!selectedChars.has("sword");document.getElementById("statsGun").hidden=!selectedChars.has("gun");
+  reset();
 }
 function loadSavedImages(){
   try{
@@ -216,7 +230,7 @@ const ghostImg=new Image();ghostImg.onload=()=>{draw();renderCharacterPreviews()
 const defaultSwordWeaponImg=new Image();defaultSwordWeaponImg.src="b8468d8cbb01d020bc";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
 const sword={x:145,y:300,vx:175,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0,wallBoost:0};
 const gun={x:455,y:300,vx:-190,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:1.5,reload:0,reloadSoundTimer:0,angle:Math.PI};
-const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:10000,maxHp:10000,angle:0,absorb:0};
+const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:1000,maxHp:1000,angle:0,absorb:0};
 let bullets=[],running=false,last=0,raf=0;
 
 function reset(){
@@ -225,7 +239,7 @@ function reset(){
  let b=a+Math.PI+(Math.random()-.5)*1.4;
  Object.assign(sword,{x:145,y:300,vx:175*Math.cos(a),vy:175*Math.sin(a),size:swordSize,maxHp:swordMaxHp,hp:swordMaxHp,attackCd:0,swing:0,hitDone:false,angle:Math.atan2(300-300,455-145),wallBoost:0});
  Object.assign(gun,{x:455,y:300,vx:190*Math.cos(b),vy:190*Math.sin(b),size:gunSize,maxHp:gunMaxHp,hp:gunMaxHp,ammo:4,shotTimer:1.5,reload:0,angle:Math.atan2(300-300,145-455)});
- Object.assign(ghost,{x:300,y:100,vx:115,vy:90,size:120,hp:10000,maxHp:10000,absorb:0});
+ Object.assign(ghost,{x:300,y:100,vx:115,vy:90,size:120,hp:1000,maxHp:1000,absorb:0});
  updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
 function start(){
@@ -236,8 +250,15 @@ startBtn.onclick=start;resetBtn.onclick=reset;
 function loop(now){
  if(!running)return;
  const dt=Math.min(0.035,(now-last)/1000);last=now;
- update(sword,dt);update(gun,dt);updateGhost(dt);swordAttack(dt);gunAttack(dt);bulletUpdate(dt);bodyCollision();draw();updateUI();
- if(sword.hp<=0||gun.hp<=0||ghost.hp<=0){running=false;statusEl.textContent=ghost.hp>0&&ghost.hp>=sword.hp&&ghost.hp>=gun.hp?"🏆 الشبح فاز!":sword.hp>0?"🏆 السياف فاز!":"🏆 شخصية المسدس فازت!";return}
+ for(const u of activeUnits()){if(u!==ghost)update(u,dt);}
+ if(selectedChars.has("ghost"))updateGhost(dt);
+ if(selectedChars.has("sword"))swordAttack(dt);
+ if(selectedChars.has("gun"))gunAttack(dt);
+ if(selectedChars.has("gun")&&selectedChars.has("sword"))bulletUpdate(dt);
+ if(selectedChars.has("gun")&&selectedChars.has("sword"))bodyCollision();
+ draw();updateUI();
+ const loser=activeUnits().find(u=>u.hp<=0);
+ if(loser){running=false;const winner=activeUnits().find(u=>u!==loser);statusEl.textContent="🏆 "+(winner===sword?"السياف":winner===gun?"المسدس":"الشبح")+" فاز!";return}
  raf=requestAnimationFrame(loop);
 }
 function update(u,dt){
@@ -265,7 +286,7 @@ function updateGhost(dt){
  if(ghost.y+r>592){ghost.y=592-r;ghost.vy=-Math.abs(ghost.vy)}
  ghost.angle=Math.atan2(ghost.vy,ghost.vx);
  // The ghost keeps moving through other fighters rather than following or sticking to them.
- for(const u of [sword,gun]){
+ for(const u of activeUnits().filter(v=>v!==ghost)){
   if(u.hp>0&&Math.abs(u.x-ghost.x)<ghost.size*.34&&Math.abs(u.y-ghost.y)<ghost.size*.34){
    const drain=Math.min(u.hp,220*dt);
    u.hp=Math.max(0,u.hp-drain);
@@ -276,15 +297,12 @@ function updateGhost(dt){
 function swordAttack(dt){
  sword.attackCd-=dt;sword.swing=Math.max(0,sword.swing-dt);
  if(sword.swing<=0&&sword.attackCd<=0){
-  const d=Math.hypot(gun.x-sword.x,gun.y-sword.y);
-  if(d<185){sword.swing=.32;sword.attackCd=1.80;sword.hitDone=false;sword.angle=Math.atan2(gun.y-sword.y,gun.x-sword.x);swordSound()}
+  const target=opponentOf(sword);const d=target?Math.hypot(target.x-sword.x,target.y-sword.y):Infinity;
+  if(target&&d<185){sword.swing=.32;sword.attackCd=1.80;sword.hitDone=false;sword.angle=Math.atan2(target.y-sword.y,target.x-sword.x);swordSound()}
  }
  if(sword.swing>0&&!sword.hitDone&&sword.swing<.16){
-  const h=getBodyHitbox(sword);
-  const dx=Math.max(0,Math.abs(gun.x-sword.x)-h.halfW);
-  const dy=Math.max(0,Math.abs(gun.y-sword.y)-h.halfH);
-  const distanceToSwordRect=Math.hypot(dx,dy);
-  if(distanceToSwordRect<185)gun.hp=Math.max(0,gun.hp-300);
+  const target=opponentOf(sword);
+  if(target){const h=getBodyHitbox(sword);const dx=Math.max(0,Math.abs(target.x-sword.x)-h.halfW);const dy=Math.max(0,Math.abs(target.y-sword.y)-h.halfH);const distanceToSwordRect=Math.hypot(dx,dy);if(distanceToSwordRect<185)target.hp=Math.max(0,target.hp-300);}
   sword.hitDone=true;
 }
 }
@@ -293,7 +311,8 @@ function gunAttack(dt){
  gun.shotTimer-=dt;
  if(gun.ammo>0&&gun.shotTimer<=0){
   gunshotSound();
-  const a=Math.atan2(sword.y-gun.y,sword.x-gun.x);
+  const target=opponentOf(gun);if(!target)return;
+  const a=Math.atan2(target.y-gun.y,target.x-gun.x);
   bullets.push({x:gun.x+Math.cos(a)*38,y:gun.y+Math.sin(a)*38,vx:Math.cos(a)*550,vy:Math.sin(a)*550,life:1.4});
   gun.ammo--;gun.shotTimer=gun.ammo>0?1.5:0;
   if(gun.ammo===0){gun.reload=7;gun.reloadSoundTimer=2;reloadSound()}
@@ -318,17 +337,18 @@ function bulletUpdate(dt){
   const oldX=b.x,oldY=b.y;
   b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;
   const steps=Math.max(1,Math.ceil(Math.hypot(b.x-oldX,b.y-oldY)/4));
-  let hit=false;
-  for(let i=1;i<=steps&&!hit;i++){
+  const target=opponentOf(gun);let hit=false;
+  if(target)for(let i=1;i<=steps&&!hit;i++){
    const t=i/steps;
-   hit=bulletHitsBody({x:oldX+(b.x-oldX)*t,y:oldY+(b.y-oldY)*t},sword);
+   hit=bulletHitsBody({x:oldX+(b.x-oldX)*t,y:oldY+(b.y-oldY)*t},target);
   }
-  if(b.life>0&&hit){sword.hp=Math.max(0,sword.hp-250);b.life=0}
+  if(b.life>0&&hit){const targetNow=opponentOf(gun);if(targetNow)targetNow.hp=Math.max(0,targetNow.hp-250);b.life=0}
  }
  bullets=bullets.filter(b=>b.life>0&&b.x>-20&&b.x<620&&b.y>-20&&b.y<620);
 }
 function bodyCollision(){
  const dx=gun.x-sword.x,dy=gun.y-sword.y,d=Math.hypot(dx,dy)||1,min=90;
+ if(!selectedChars.has("sword")||!selectedChars.has("gun"))return;
  if(d<min){
   const nx=dx/d,ny=dy/d,push=(min-d)/2;
   sword.x-=nx*push;sword.y-=ny*push;gun.x+=nx*push;gun.y+=ny*push;
@@ -359,7 +379,7 @@ function draw(){
  ctx.strokeStyle="rgba(255,255,255,.08)";ctx.lineWidth=2;
  for(let i=150;i<600;i+=150){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,600);ctx.moveTo(0,i);ctx.lineTo(600,i);ctx.stroke()}
  for(const b of bullets){ctx.fillStyle="#ffd34d";ctx.beginPath();ctx.arc(b.x,b.y,5,0,Math.PI*2);ctx.fill()}
- drawSword();drawGun();drawGhost();
+ if(selectedChars.has("sword"))drawSword();if(selectedChars.has("gun"))drawGun();if(selectedChars.has("ghost"))drawGhost();
 }
 function square(x,y,size,fill){ctx.fillStyle=fill;ctx.fillRect(x-size/2,y-size/2,size,size)}
 function drawSword(){
@@ -436,6 +456,7 @@ function drawGun(){
  ctx.font="bold 11px system-ui";ctx.fillText(gun.reload>0?"🔄 "+gun.reload.toFixed(1)+"s":"🔫 "+gun.ammo+"/4",gun.x,gun.y+43);
 }
 loadSavedImages();
+refreshSelection();
 showCharacters();
 </script>
 </body>
