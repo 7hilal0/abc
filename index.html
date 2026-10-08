@@ -237,7 +237,7 @@ function update(u,dt){
  if(u.y+r>592){u.y=592-r;u.vy=-Math.abs(u.vy);swordWallHit=true}
  const speed=Math.hypot(u.vx,u.vy);
  const target=u===sword?175:190;
- if(speed>0 && swordWallHit && u===sword){u.vx=u.vx/speed*180;u.vy=u.vy/speed*180;u.wallBoost=1.5}
+ if(speed>0 && swordWallHit && u===sword){u.vx=u.vx/speed*185;u.vy=u.vy/speed*185;u.wallBoost=1.5}
  if(u===sword && u.wallBoost>0){
    u.wallBoost=Math.max(0,u.wallBoost-dt);
    if(u.wallBoost<=0){const s=Math.hypot(u.vx,u.vy)||1;u.vx=u.vx/s*175;u.vy=u.vy/s*175;}
