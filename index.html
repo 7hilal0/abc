@@ -47,8 +47,8 @@ const barA=document.getElementById("barA"),barB=document.getElementById("barB");
 const statusEl=document.getElementById("status");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
 
-const sword={x:145,y:300,vx:170,vy:105,size:90,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0};
-const gun={x:455,y:300,vx:-175,vy:-100,size:90,hp:120,maxHp:120,ammo:4,shotTimer:3.6,reload:0,angle:Math.PI};
+const sword={x:145,y:300,vx:170,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0};
+const gun={x:455,y:300,vx:-175,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:3.6,reload:0,angle:Math.PI};
 let bullets=[],running=false,last=0,raf=0;
 
 function reset(){
