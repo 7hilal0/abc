@@ -364,7 +364,6 @@ function bodyCollision(){
 }
 const statSwordHp=document.getElementById("statSwordHp"),statGunHp=document.getElementById("statGunHp"),statGhostHp=document.getElementById("statGhostHp"),statSwordSpeed=document.getElementById("statSwordSpeed"),statGunSpeed=document.getElementById("statGunSpeed"),statGhostSpeed=document.getElementById("statGhostSpeed"),statGunAmmo=document.getElementById("statGunAmmo"),statGunAbility=document.getElementById("statGunAbility");
 function updateUI(){
- hpA.textContent=Math.ceil(sword.hp);hpB.textContent=Math.ceil(gun.hp);hpGhost.textContent=Math.ceil(ghost.hp);
  barA.style.width=Math.max(0,sword.hp/sword.maxHp*100)+"%";barB.style.width=Math.max(0,gun.hp/gun.maxHp*100)+"%";barGhost.style.width=Math.max(0,ghost.hp/ghost.maxHp*100)+"%";
  if(statSwordHp)statSwordHp.textContent=Math.ceil(sword.hp)+" / "+sword.maxHp;
  if(statGunHp)statGunHp.textContent=Math.ceil(gun.hp)+" / "+gun.maxHp;
