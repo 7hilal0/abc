@@ -83,7 +83,6 @@ const battleBtn=document.getElementById("battleBtn"),backCharacters=document.get
 const swordPreview=document.getElementById("swordPreview"),gunPreview=document.getElementById("gunPreview");
 const editSword=document.getElementById("editSword"),editGun=document.getElementById("editGun");
 const startBtn=document.getElementById("start"),resetBtn=document.getElementById("reset");
-const pickSword=document.getElementById("pickSword"),pickGun=document.getElementById("pickGun");
 const swordFile=document.getElementById("swordFile"),gunFile=document.getElementById("gunFile");
 let customSwordImg=null,customGunImg=null;
 
@@ -123,8 +122,6 @@ function chooseImage(input,type){
   reader.readAsDataURL(file);
   input.value="";
 }
-pickSword.onclick=()=>swordFile.click();
-pickGun.onclick=()=>gunFile.click();
 editSword.onclick=()=>swordFile.click();
 editGun.onclick=()=>gunFile.click();
 battleBtn.onclick=()=>{showBattle();start()};
