@@ -312,7 +312,12 @@ function updateUI(){
  barA.style.width=Math.max(0,sword.hp/sword.maxHp*100)+"%";barB.style.width=Math.max(0,gun.hp/gun.maxHp*100)+"%";
  if(statSwordHp)statSwordHp.textContent=Math.ceil(sword.hp)+" / "+sword.maxHp;
  if(statGunHp)statGunHp.textContent=Math.ceil(gun.hp)+" / "+gun.maxHp;
- if(statSwordSpeed)statSwordSpeed.textContent=Math.round(Math.hypot(sword.vx,sword.vy))+(sword.wallBoost>0?" (180 بعد اصطدام الجدار)":"");
+ if(statSwordSpeed){
+  const currentSpeed=Math.round(Math.hypot(sword.vx,sword.vy));
+  statSwordSpeed.innerHTML=currentSpeed+(sword.wallBoost>0
+    ? '<div style="font-size:11px;color:#78e6ff;margin-top:3px">⏱ '+sword.wallBoost.toFixed(1)+'ث</div>'
+    : '');
+}
  if(statGunSpeed)statGunSpeed.textContent=Math.round(Math.hypot(gun.vx,gun.vy));
  if(statGunAmmo)statGunAmmo.textContent=gun.reload>0?"إعادة تعبئة "+gun.reload.toFixed(1)+" ث":gun.ammo+" / 4";
  if(statGunAbility)statGunAbility.textContent=gun.reload>0?"إعادة التعبئة جارية":"4 طلقات • كل 1.5 ث";
