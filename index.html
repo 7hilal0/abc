@@ -455,10 +455,13 @@ function drawSword(){
   }
 }
 function drawGhost(){
+ const insideOpponent=activeUnits().some(u=>u!==ghost&&u.hp>0&&
+  Math.abs(u.x-ghost.x)<(u.size+ghost.size)*.38&&
+  Math.abs(u.y-ghost.y)<(u.size+ghost.size)*.38);
  ctx.save();
- // Bright silver aura directly around the ghost's image; no opponent tracking or rotation.
- ctx.shadowColor="rgba(232,239,249,1)";ctx.shadowBlur=36;
- ctx.globalAlpha=.98;
+ // Keep the silver glow, but fade the ghost when its sprite overlaps an opponent.
+ ctx.shadowColor="rgba(232,239,249,1)";ctx.shadowBlur=insideOpponent?14:36;
+ ctx.globalAlpha=insideOpponent?.32:.98;
  if(ghostImg.complete&&ghostImg.naturalWidth>0){
   ctx.drawImage(ghostImg,ghost.x-ghost.size/2,ghost.y-ghost.size/2,ghost.size,ghost.size);
  }else{
