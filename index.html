@@ -353,7 +353,7 @@ function swordAttack(dt){
  }
  if(sword.swing>0&&!sword.hitDone&&sword.swing<.16){
   const target=opponentOf(sword);
-  if(target){const h=getBodyHitbox(sword);const dx=Math.max(0,Math.abs(target.x-sword.x)-h.halfW);const dy=Math.max(0,Math.abs(target.y-sword.y)-h.halfH);const distanceToSwordRect=Math.hypot(dx,dy);if(distanceToSwordRect<185){target.hp=Math.max(0,target.hp-300);showDamage(target,300);}}
+  if(target){const h=getBodyHitbox(sword);const dx=Math.max(0,Math.abs(target.x-sword.x)-h.halfW);const dy=Math.max(0,Math.abs(target.y-sword.y)-h.halfH);const distanceToSwordRect=Math.hypot(dx,dy);if(distanceToSwordRect<185){applyDamage(target,300);}}
   sword.hitDone=true;
 }
 }
@@ -393,7 +393,7 @@ function bulletUpdate(dt){
    const t=i/steps;
    hit=bulletHitsBody({x:oldX+(b.x-oldX)*t,y:oldY+(b.y-oldY)*t},target);
   }
-  if(b.life>0&&hit){const targetNow=opponentOf(gun);if(targetNow){targetNow.hp=Math.max(0,targetNow.hp-250);showDamage(targetNow,250)}b.life=0}
+  if(b.life>0&&hit){const targetNow=opponentOf(gun);if(targetNow)applyDamage(targetNow,250);b.life=0}
  }
  bullets=bullets.filter(b=>b.life>0&&b.x>-20&&b.x<620&&b.y>-20&&b.y<620);
 }
@@ -435,6 +435,8 @@ function draw(){
  if(selectedChars.has("sword"))drawSword();if(selectedChars.has("gun"))drawGun();if(selectedChars.has("ghost"))drawGhost();
  drawFloatingDamage();
 }
+function isGhostTransparent(){return activeUnits().some(u=>u!==ghost&&u.hp>0&&Math.abs(u.x-ghost.x)<(u.size+ghost.size)*.38&&Math.abs(u.y-ghost.y)<(u.size+ghost.size)*.38);}
+function applyDamage(target,amount){const actualDamage=Math.round(target===ghost&&isGhostTransparent()?amount*.8:amount);target.hp=Math.max(0,target.hp-actualDamage);showDamage(target,actualDamage);}
 function showDamage(target,amount){
  floatingDamage.push({x:target.x,y:target.y+target.size/2+18,amount,life:.85,maxLife:.85});
 }
@@ -495,9 +497,7 @@ function drawSword(){
   }
 }
 function drawGhost(){
- const insideOpponent=activeUnits().some(u=>u!==ghost&&u.hp>0&&
-  Math.abs(u.x-ghost.x)<(u.size+ghost.size)*.38&&
-  Math.abs(u.y-ghost.y)<(u.size+ghost.size)*.38);
+ const insideOpponent=isGhostTransparent();
  ctx.save();
  // Keep the silver glow, but fade the ghost when its sprite overlaps an opponent.
  ctx.shadowColor="rgba(232,239,249,1)";ctx.shadowBlur=insideOpponent?14:36;
