@@ -122,7 +122,6 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
     <p>⏱️ الفاصل بين الضربات: <strong>0.5 ثانية</strong></p>
     <p>🧭 الحركة: <strong>يتحرك مستقلًا ولا يطارد الخصم</strong></p>
     <p>🧱 الجدران: <strong>يرتد عند حدود الحلبة</strong></p>
-    <p class="ghost-ability">✨ القدرة: <strong>هجوم عند المرور بالقرب من الخصم، مع هالة فضية مضيئة</strong></p>
   </div>
 </div>
 <input id="swordFile" type="file" accept="image/*" hidden>
@@ -434,14 +433,15 @@ function drawSword(){
 }
 function drawGhost(){
  ctx.save();
- ctx.shadowColor="rgba(220,230,242,.95)";ctx.shadowBlur=24;
- ctx.strokeStyle="rgba(235,241,249,.9)";ctx.lineWidth=3;
- ctx.beginPath();ctx.arc(ghost.x,ghost.y,ghost.size*.43,0,Math.PI*2);ctx.stroke();
- ctx.globalAlpha=.9;
+ // Bright silver aura directly around the ghost's image; no opponent tracking or rotation.
+ ctx.shadowColor="rgba(232,239,249,1)";ctx.shadowBlur=36;
+ ctx.globalAlpha=.98;
  if(ghostImg.complete&&ghostImg.naturalWidth>0){
   ctx.drawImage(ghostImg,ghost.x-ghost.size/2,ghost.y-ghost.size/2,ghost.size,ghost.size);
  }else{
-  ctx.fillStyle="#cbd4e0";ctx.beginPath();ctx.arc(ghost.x,ghost.y,ghost.size*.38,0,Math.PI*2);ctx.fill();
+  const glow=ctx.createRadialGradient(ghost.x,ghost.y,ghost.size*.08,ghost.x,ghost.y,ghost.size*.48);
+  glow.addColorStop(0,"#f5f7fb");glow.addColorStop(.68,"#cbd4e0");glow.addColorStop(1,"rgba(173,185,202,.12)");
+  ctx.fillStyle=glow;ctx.beginPath();ctx.arc(ghost.x,ghost.y,ghost.size*.42,0,Math.PI*2);ctx.fill();
   ctx.fillStyle="#27313f";ctx.beginPath();ctx.arc(ghost.x-12,ghost.y-5,5,0,Math.PI*2);ctx.arc(ghost.x+12,ghost.y-5,5,0,Math.PI*2);ctx.fill();
  }
  ctx.restore();
