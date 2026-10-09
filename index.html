@@ -99,27 +99,29 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
     <h3>⚔️ السياف</h3>
     <p>❤️ الصحة: <strong id="statSwordHp">1000 / 1000</strong></p><div class="hp"><div id="barA" class="bar"></div></div>
     <p>⚡ السرعة: <strong id="statSwordSpeed">175</strong></p>
-    <p>💥 ضرر الضربة: <strong>300</strong></p>
-    <p>🗡️ المدى: <strong>185</strong></p>
-    <p>⏱️ وقت بين الضربات: <strong>1.8 ثانية</strong></p>
-    <p>✨ القدرة: <strong>ضربة سيف قريبة، وتزيد سرعته إلى 185 لمدة 2.1 ثانية بعد اصطدامه بالجدار</strong></p>
+    <p>💥 الضرر: <strong>300 لكل ضربة</strong></p>
+    <p>🎯 المدى: <strong>185 وحدة</strong></p>
+    <p>✨ القدرة: <strong>تزداد سرعته إلى 185 لمدة 2.1 ثانية بعد اصطدامه بالجدار</strong></p>
+    <p>⏱️ وقت الهجوم: <strong>كل 1.8 ثانية</strong></p>
   </div>
   <div class="stats-card" id="statsGun">
     <h3>🔫 المسدد</h3>
     <p>❤️ الصحة: <strong id="statGunHp">1000 / 1000</strong></p><div class="hp"><div id="barB" class="bar"></div></div>
     <p>⚡ السرعة: <strong id="statGunSpeed">190</strong></p>
-    <p>💥 ضرر الطلقة: <strong>250</strong></p>
-    <p>🎯 سرعة الطلقة: <strong>550</strong></p>
+    <p>💥 الضرر: <strong>250 لكل طلقة</strong></p>
+    <p>🎯 المدى: <strong>حتى 770 وحدة (حسب مسار الطلقة)</strong></p>
+    <p>✨ القدرة: <strong id="statGunAbility">4 طلقات ثم إعادة تعبئة 7 ثوانٍ</strong></p>
     <p>🔫 الذخيرة: <strong class="live" id="statGunAmmo">4 / 4</strong></p>
     <p>⏱️ وقت بين الطلقات: <strong>1.5 ثانية</strong></p>
-    <p>✨ القدرة: <strong id="statGunAbility">4 طلقات ثم إعادة تعبئة 7 ثوانٍ</strong></p>
   </div>
   <div class="stats-card ghost-card" id="statsGhost">
     <h3>👻 الشبح</h3>
     <p>❤️ الصحة: <strong id="statGhostHp">1000 / 1000</strong></p><div class="hp"><div id="barGhost" class="bar"></div></div>
-    <p>⚡ السرعة: <strong id="statGhostSpeed">146</strong></p>
-    <p>💥 الضرر: <strong>90 نقطة</strong></p>
-    <p>✨ القدرة: <strong id="statGhostAbility">يطارد الخصم لمدة ثانيتين • تتجدد كل 5 ثوانٍ</strong></p>
+    <p>⚡ السرعة: <strong id="statGhostSpeed">115</strong></p>
+    <p>💥 الضرر: <strong>90 لكل لمسة</strong></p>
+    <p>🎯 المدى: <strong>قريب جدًا — عند ملامسة الخصم تقريبًا</strong></p>
+    <p>✨ القدرة: <strong id="statGhostAbility">يطارد الخصم بسرعة 230 لمدة ثانيتين إذا اقترب ضمن 190 وحدة</strong></p>
+    <p>⏱️ وقت الهجوم: <strong>كل 0.5 ثانية عند التلامس</strong></p>
   </div>
 </div>
 <input id="swordFile" type="file" accept="image/*" hidden>
@@ -418,7 +420,7 @@ function updateUI(){
     : '');
 }
  if(statGunSpeed)statGunSpeed.textContent=Math.round(Math.hypot(gun.vx,gun.vy));
- if(statGhostSpeed)statGhostSpeed.textContent=Math.round(Math.hypot(ghost.vx,ghost.vy));
+ if(statGhostSpeed)statGhostSpeed.textContent=Math.round(Math.hypot(ghost.vx,ghost.vy))+(ghost.chaseTimer>0?" (مطاردة)":"");
  if(statGhostAbility)statGhostAbility.textContent=ghost.chaseTimer>0?"يطارد الخصم! "+ghost.chaseTimer.toFixed(1)+" ث":ghost.chaseCooldown>0?"إعادة الشحن: "+ghost.chaseCooldown.toFixed(1)+" ث":"يلحق بالخصم إذا اقترب ضمن 190 • جاهزة";
  if(statGunAmmo)statGunAmmo.textContent=gun.reload>0?"إعادة تعبئة "+gun.reload.toFixed(1)+" ث":gun.ammo+" / 4";
  if(statGunAbility)statGunAbility.textContent=gun.reload>0?"إعادة التعبئة جارية":"4 طلقات • كل 1.5 ث";
