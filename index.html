@@ -236,7 +236,7 @@ const ghostImg=new Image();ghostImg.onload=()=>{draw();renderCharacterPreviews()
 const defaultSwordWeaponImg=new Image();defaultSwordWeaponImg.src="b8468d8cbb01d020bc";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
 const sword={x:145,y:300,vx:175,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0,wallBoost:0};
 const gun={x:455,y:300,vx:-190,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:1.5,reload:0,reloadSoundTimer:0,angle:Math.PI};
-const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:1000,maxHp:1000,angle:0,damageCd:0};
+const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:1000,maxHp:1000,angle:0,damageCd:0,chaseTimer:0,chaseTarget:null};
 let bullets=[],running=false,last=0,raf=0;
 
 function reset(){
@@ -245,7 +245,7 @@ function reset(){
  let b=a+Math.PI+(Math.random()-.5)*1.4;
  Object.assign(sword,{x:145,y:300,vx:175*Math.cos(a),vy:175*Math.sin(a),size:swordSize,maxHp:swordMaxHp,hp:swordMaxHp,attackCd:0,swing:0,hitDone:false,angle:Math.atan2(300-300,455-145),wallBoost:0});
  Object.assign(gun,{x:455,y:300,vx:190*Math.cos(b),vy:190*Math.sin(b),size:gunSize,maxHp:gunMaxHp,hp:gunMaxHp,ammo:4,shotTimer:1.5,reload:0,angle:Math.atan2(300-300,145-455)});
- Object.assign(ghost,{x:300,y:100,vx:115,vy:90,size:120,hp:1000,maxHp:1000,damageCd:0,stickTimer:0,stuckTo:null});
+ Object.assign(ghost,{x:300,y:100,vx:115,vy:90,size:120,hp:1000,maxHp:1000,damageCd:0,chaseTimer:0,chaseTarget:null});
  updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
 function start(){
@@ -285,36 +285,37 @@ function update(u,dt){
 }
 function updateGhost(dt){
  ghost.damageCd=Math.max(0,ghost.damageCd-dt);
+ ghost.chaseTimer=Math.max(0,(ghost.chaseTimer||0)-dt);
  const r=ghost.size/2;
  const targets=activeUnits().filter(v=>v!==ghost&&v.hp>0);
  let target=null,dist=Infinity;
  for(const u of targets){const d=Math.hypot(u.x-ghost.x,u.y-ghost.y);if(d<dist){dist=d;target=u;}}
- // Chase the nearest living opponent, but never attach to or overlap it intentionally.
- if(target){
-  const dx=target.x-ghost.x,dy=target.y-ghost.y;
+ // Start a short chase when an opponent comes within detection range.
+ if(target&&dist<260&&ghost.chaseTimer<=0){ghost.chaseTimer=2;ghost.chaseTarget=target;}
+ const chaseTarget=ghost.chaseTimer>0&&ghost.chaseTarget&&ghost.chaseTarget.hp>0?ghost.chaseTarget:null;
+ if(chaseTarget){
+  const dx=chaseTarget.x-ghost.x,dy=chaseTarget.y-ghost.y;
   const d=Math.hypot(dx,dy)||1;
-  const speed=175;
+  const speed=110; // 25% slower than the ghost's former ~146 speed.
   ghost.vx=dx/d*speed;ghost.vy=dy/d*speed;
-  if(d>ghost.size*.52){
-   ghost.x+=ghost.vx*dt;ghost.y+=ghost.vy*dt;
-  }else{
-   // Keep a small gap and circle around the target rather than sticking to them.
-   const gap=ghost.size*.52;
-   ghost.x=target.x-dx/d*gap;
-   ghost.y=target.y-dy/d*gap;
+  const gap=ghost.size*.52;
+  if(d>gap){
+   const step=Math.min(speed*dt,d-gap);
+   ghost.x+=dx/d*step;ghost.y+=dy/d*step;
   }
   if(ghost.damageCd<=0&&d<ghost.size*.7){
-   target.hp=Math.max(0,target.hp-100);
+   chaseTarget.hp=Math.max(0,chaseTarget.hp-100);
    ghost.damageCd=0.1;
   }
  }else{
+  ghost.chaseTimer=0;ghost.chaseTarget=null;
   ghost.x+=ghost.vx*dt;ghost.y+=ghost.vy*dt;
  }
  if(ghost.x-r<8){ghost.x=8+r;ghost.vx=Math.abs(ghost.vx)}
  if(ghost.x+r>592){ghost.x=592-r;ghost.vx=-Math.abs(ghost.vx)}
  if(ghost.y-r<8){ghost.y=8+r;ghost.vy=Math.abs(ghost.vy)}
  if(ghost.y+r>592){ghost.y=592-r;ghost.vy=-Math.abs(ghost.vy)}
- ghost.angle=target?Math.atan2(target.y-ghost.y,target.x-ghost.x):Math.atan2(ghost.vy,ghost.vx);
+ ghost.angle=chaseTarget?Math.atan2(chaseTarget.y-ghost.y,chaseTarget.x-ghost.x):Math.atan2(ghost.vy,ghost.vx);
 }
 function swordAttack(dt){
  sword.attackCd-=dt;sword.swing=Math.max(0,sword.swing-dt);
