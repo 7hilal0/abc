@@ -120,7 +120,7 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
     <p>⚡ السرعة: <strong id="statGhostSpeed">146</strong></p>
     <p>💥 قوة الهجوم: <strong>100 ضرر كل 0.3 ثانية</strong></p>
     <p>🧱 الاصطدام: <strong>يرتد عن جدران الحلبة</strong></p>
-    <p>✨ القدرة: <strong>يمر عبر الخصم ويسبب له 100 ضرر كل 0.3 ثانية عند التلامس</strong></p>
+    <p>✨ القدرة: <strong>يطارد الخصم لمدة ثانية واحدة؛ تتجدد القدرة كل 4 ثوانٍ، ويسبب 100 ضرر كل 0.5 ثانية عند الاقتراب</strong></p>
   </div>
 </div>
 <input id="swordFile" type="file" accept="image/*" hidden>
@@ -236,7 +236,7 @@ const ghostImg=new Image();ghostImg.onload=()=>{draw();renderCharacterPreviews()
 const defaultSwordWeaponImg=new Image();defaultSwordWeaponImg.src="b8468d8cbb01d020bc";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
 const sword={x:145,y:300,vx:175,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0,wallBoost:0};
 const gun={x:455,y:300,vx:-190,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:1.5,reload:0,reloadSoundTimer:0,angle:Math.PI};
-const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:1000,maxHp:1000,angle:0,damageCd:0,chaseTimer:0,chaseTarget:null};
+const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:1000,maxHp:1000,angle:0,damageCd:0,chaseTimer:0,chaseCooldown:0,chaseTarget:null};
 let bullets=[],running=false,last=0,raf=0;
 
 function reset(){
@@ -286,17 +286,20 @@ function update(u,dt){
 function updateGhost(dt){
  ghost.damageCd=Math.max(0,ghost.damageCd-dt);
  ghost.chaseTimer=Math.max(0,(ghost.chaseTimer||0)-dt);
+ ghost.chaseCooldown=Math.max(0,(ghost.chaseCooldown||0)-dt);
  const r=ghost.size/2;
  const targets=activeUnits().filter(v=>v!==ghost&&v.hp>0);
  let target=null,dist=Infinity;
  for(const u of targets){const d=Math.hypot(u.x-ghost.x,u.y-ghost.y);if(d<dist){dist=d;target=u;}}
- // Start a short chase when an opponent comes within detection range.
- if(target&&dist<260&&ghost.chaseTimer<=0){ghost.chaseTimer=2;ghost.chaseTarget=target;}
+ // Chase for 1 second, then recharge this ability for 4 seconds.
+ if(target&&dist<260&&ghost.chaseTimer<=0&&ghost.chaseCooldown<=0){
+  ghost.chaseTimer=1;ghost.chaseCooldown=4;ghost.chaseTarget=target;
+ }
  const chaseTarget=ghost.chaseTimer>0&&ghost.chaseTarget&&ghost.chaseTarget.hp>0?ghost.chaseTarget:null;
  if(chaseTarget){
   const dx=chaseTarget.x-ghost.x,dy=chaseTarget.y-ghost.y;
   const d=Math.hypot(dx,dy)||1;
-  const speed=110; // 25% slower than the ghost's former ~146 speed.
+  const speed=110;
   ghost.vx=dx/d*speed;ghost.vy=dy/d*speed;
   const gap=ghost.size*.52;
   if(d>gap){
@@ -308,7 +311,7 @@ function updateGhost(dt){
    ghost.damageCd=0.5;
   }
  }else{
-  ghost.chaseTimer=0;ghost.chaseTarget=null;
+  if(ghost.chaseTimer<=0)ghost.chaseTarget=null;
   ghost.x+=ghost.vx*dt;ghost.y+=ghost.vy*dt;
  }
  if(ghost.x-r<8){ghost.x=8+r;ghost.vx=Math.abs(ghost.vx)}
