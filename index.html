@@ -305,7 +305,7 @@ function updateGhost(dt){
   }
   if(ghost.damageCd<=0&&d<ghost.size*.7){
    chaseTarget.hp=Math.max(0,chaseTarget.hp-100);
-   ghost.damageCd=0.1;
+   ghost.damageCd=0.5;
   }
  }else{
   ghost.chaseTimer=0;ghost.chaseTarget=null;
