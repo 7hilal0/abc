@@ -122,6 +122,7 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
     <p>⏱️ الفاصل بين الضربات: <strong>0.5 ثانية</strong></p>
     <p>🧭 الحركة: <strong>يتحرك مستقلًا ولا يطارد الخصم</strong></p>
     <p>🧱 الجدران: <strong>يرتد عند حدود الحلبة</strong></p>
+    <p>✨ القدرة: <strong id="statGhostAbility">يطرد الخصم لمدة ثانيتين • تتجدد كل 5 ثوانٍ</strong></p>
   </div>
 </div>
 <input id="swordFile" type="file" accept="image/*" hidden>
@@ -237,7 +238,7 @@ const ghostImg=new Image();ghostImg.onload=()=>{draw();renderCharacterPreviews()
 const defaultSwordWeaponImg=new Image();defaultSwordWeaponImg.src="b8468d8cbb01d020bc";knightImg.onerror=()=>{knightImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"300\" height=\"300\"><rect width=\"100%\" height=\"100%\" fill=\"#dfe4eb\"/><text x=\"50%\" y=\"54%\" text-anchor=\"middle\" font-size=\"90\">⚔️</text></svg>")};
 const sword={x:145,y:300,vx:175,vy:105,size:100,hp:140,maxHp:140,attackCd:0,swing:0,hitDone:false,angle:0,wallBoost:0};
 const gun={x:455,y:300,vx:-190,vy:-100,size:100,hp:120,maxHp:120,ammo:4,shotTimer:1.5,reload:0,reloadSoundTimer:0,angle:Math.PI};
-const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:1000,maxHp:1000,angle:0,damageCd:0,chaseTimer:0,chaseCooldown:0,chaseTarget:null};
+const ghost={x:300,y:100,vx:0,vy:150,size:120,hp:1000,maxHp:1000,angle:0,damageCd:0,repelTimer:0,repelCooldown:0,repelTarget:null};
 let bullets=[],running=false,last=0,raf=0;
 
 function reset(){
@@ -246,7 +247,7 @@ function reset(){
  let b=a+Math.PI+(Math.random()-.5)*1.4;
  Object.assign(sword,{x:145,y:300,vx:175*Math.cos(a),vy:175*Math.sin(a),size:swordSize,maxHp:swordMaxHp,hp:swordMaxHp,attackCd:0,swing:0,hitDone:false,angle:Math.atan2(300-300,455-145),wallBoost:0});
  Object.assign(gun,{x:455,y:300,vx:190*Math.cos(b),vy:190*Math.sin(b),size:gunSize,maxHp:gunMaxHp,hp:gunMaxHp,ammo:4,shotTimer:1.5,reload:0,angle:Math.atan2(300-300,145-455)});
- Object.assign(ghost,{x:300,y:100,vx:115,vy:90,size:120,hp:1000,maxHp:1000,damageCd:0,chaseTimer:0,chaseTarget:null});
+ Object.assign(ghost,{x:300,y:100,vx:115,vy:90,size:120,hp:1000,maxHp:1000,damageCd:0,repelTimer:0,repelCooldown:0,repelTarget:null});
  updateUI();draw();statusEl.textContent="السياف والمسدد يتحركان تلقائياً داخل الحلبة.";
 }
 function start(){
@@ -286,14 +287,35 @@ function update(u,dt){
 }
 function updateGhost(dt){
  ghost.damageCd=Math.max(0,ghost.damageCd-dt);
+ ghost.repelCooldown=Math.max(0,ghost.repelCooldown-dt);
  const r=ghost.size/2;
  ghost.x+=ghost.vx*dt;ghost.y+=ghost.vy*dt;
  if(ghost.x-r<8){ghost.x=8+r;ghost.vx=Math.abs(ghost.vx)}
  if(ghost.x+r>592){ghost.x=592-r;ghost.vx=-Math.abs(ghost.vx)}
  if(ghost.y-r<8){ghost.y=8+r;ghost.vy=Math.abs(ghost.vy)}
  if(ghost.y+r>592){ghost.y=592-r;ghost.vy=-Math.abs(ghost.vy)}
+ const opponents=activeUnits().filter(v=>v!==ghost&&v.hp>0);
+ // Ability: repel a nearby opponent for 2 seconds, with a 5-second cooldown.
+ if(ghost.repelTimer<=0&&ghost.repelCooldown<=0){
+  const target=opponents.find(u=>Math.hypot(u.x-ghost.x,u.y-ghost.y)<190);
+  if(target){ghost.repelTimer=2;ghost.repelCooldown=5;ghost.repelTarget=target;}
+ }
+ if(ghost.repelTimer>0&&ghost.repelTarget&&ghost.repelTarget.hp>0){
+  ghost.repelTimer=Math.max(0,ghost.repelTimer-dt);
+  const target=ghost.repelTarget;
+  const dx=target.x-ghost.x,dy=target.y-ghost.y,d=Math.hypot(dx,dy)||1;
+  const pushSpeed=300;
+  target.vx=dx/d*pushSpeed;
+  target.vy=dy/d*pushSpeed;
+  if(ghost.repelTimer<=0){
+   const normalSpeed=target===sword?(target.wallBoost>0?185:175):190;
+   target.vx=dx/d*normalSpeed;
+   target.vy=dy/d*normalSpeed;
+   ghost.repelTarget=null;
+  }
+ }else if(ghost.repelTimer<=0){ghost.repelTarget=null;}
  // The ghost moves independently and only deals damage when it naturally passes close to an opponent.
- for(const u of activeUnits().filter(v=>v!==ghost&&v.hp>0)){
+ for(const u of opponents){
   if(ghost.damageCd<=0&&Math.abs(u.x-ghost.x)<ghost.size*.7&&Math.abs(u.y-ghost.y)<ghost.size*.7){
    u.hp=Math.max(0,u.hp-90);
    ghost.damageCd=0.5;
@@ -364,7 +386,7 @@ function bodyCollision(){
   if(rv<0){sword.vx+=rv*nx;sword.vy+=rv*ny;gun.vx-=rv*nx;gun.vy-=rv*ny}
  }
 }
-const statSwordHp=document.getElementById("statSwordHp"),statGunHp=document.getElementById("statGunHp"),statGhostHp=document.getElementById("statGhostHp"),statSwordSpeed=document.getElementById("statSwordSpeed"),statGunSpeed=document.getElementById("statGunSpeed"),statGhostSpeed=document.getElementById("statGhostSpeed"),statGunAmmo=document.getElementById("statGunAmmo"),statGunAbility=document.getElementById("statGunAbility");
+const statSwordHp=document.getElementById("statSwordHp"),statGunHp=document.getElementById("statGunHp"),statGhostHp=document.getElementById("statGhostHp"),statSwordSpeed=document.getElementById("statSwordSpeed"),statGunSpeed=document.getElementById("statGunSpeed"),statGhostSpeed=document.getElementById("statGhostSpeed"),statGunAmmo=document.getElementById("statGunAmmo"),statGunAbility=document.getElementById("statGunAbility"),statGhostAbility=document.getElementById("statGhostAbility");
 function updateUI(){
  barA.style.width=Math.max(0,sword.hp/sword.maxHp*100)+"%";barB.style.width=Math.max(0,gun.hp/gun.maxHp*100)+"%";barGhost.style.width=Math.max(0,ghost.hp/ghost.maxHp*100)+"%";
  if(statSwordHp)statSwordHp.textContent=Math.ceil(sword.hp)+" / "+sword.maxHp;
@@ -378,6 +400,7 @@ function updateUI(){
 }
  if(statGunSpeed)statGunSpeed.textContent=Math.round(Math.hypot(gun.vx,gun.vy));
  if(statGhostSpeed)statGhostSpeed.textContent=Math.round(Math.hypot(ghost.vx,ghost.vy));
+ if(statGhostAbility)statGhostAbility.textContent=ghost.repelTimer>0?"يطرد الخصم! "+ghost.repelTimer.toFixed(1)+" ث":ghost.repelCooldown>0?"تجدد القدرة خلال "+ghost.repelCooldown.toFixed(1)+" ث":"يطرد الخصم لمدة ثانيتين • جاهزة";
  if(statGunAmmo)statGunAmmo.textContent=gun.reload>0?"إعادة تعبئة "+gun.reload.toFixed(1)+" ث":gun.ammo+" / 4";
  if(statGunAbility)statGunAbility.textContent=gun.reload>0?"إعادة التعبئة جارية":"4 طلقات • كل 1.5 ث";
 }
