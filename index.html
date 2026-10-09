@@ -133,7 +133,7 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
 "use strict";
 const canvas=document.getElementById("arena");
 const ctx=canvas?canvas.getContext("2d"):null;
-if(!canvas||!ctx){throw new Error("Canvas غير متاح");}const swordHitAudio=new Audio("mixkit-metal-hit-woosh-1485.wav");swordHitAudio.preload="auto";const reloadAudio=new Audio("mixkit-shotgun-pump-1659.wav");reloadAudio.preload="auto";const gunshotAudio=new Audio(encodeURI("صوت اطلاق نار شخصيت كو بوي .mp3"));gunshotAudio.preload="auto";function playSwordHit(){try{swordHitAudio.currentTime=0;swordHitAudio.play().catch(()=>{})}catch(e){}}function playReload(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}let audioCtx=null;function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}}function tone(freq,dur,gain,type="square"){ensureAudio();if(!audioCtx)return;const t=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.45),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur)}function gunshotSound(){try{gunshotAudio.currentTime=0;gunshotAudio.play().catch(()=>{})}catch(e){}}function reloadSound(){playReload()}function swordSound(){playSwordHit()}
+if(!canvas||!ctx){throw new Error("Canvas غير متاح");}const swordHitAudio=new Audio("mixkit-metal-hit-woosh-1485.wav");swordHitAudio.preload="auto";const reloadAudio=new Audio("mixkit-shotgun-pump-1659.wav");reloadAudio.preload="auto";const gunshotAudio=new Audio(encodeURI("صوت اطلاق نار شخصيت كو بوي .mp3"));gunshotAudio.preload="auto";function playSwordHit(){try{swordHitAudio.currentTime=0;swordHitAudio.play().catch(()=>{})}catch(e){}}function playReload(){try{reloadAudio.currentTime=0;reloadAudio.play().catch(()=>{})}catch(e){}}let audioCtx=null;function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==="suspended")audioCtx.resume()}catch(e){}}function tone(freq,dur,gain,type="square"){ensureAudio();if(!audioCtx)return;const t=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.setValueAtTime(freq,t);o.frequency.exponentialRampToValueAtTime(Math.max(30,freq*.45),t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g).connect(audioCtx.destination);o.start(t);o.stop(t+dur)}function gunshotSound(){try{gunshotAudio.currentTime=0;gunshotAudio.play().catch(()=>{})}catch(e){}}function playHurtSound(target){const f=target===ghost?420:target===gun?145:210;const wave=target===ghost?"triangle":"sawtooth";tone(f,.12,.045,wave);tone(f*.62,.08,.025,"triangle")}function reloadSound(){playReload()}function swordSound(){playSwordHit()}
 const hpA=document.getElementById("hpA"),hpB=document.getElementById("hpB"),hpGhost=document.getElementById("hpGhost");
 const barA=document.getElementById("barA"),barB=document.getElementById("barB"),barGhost=document.getElementById("barGhost");
 const statusEl=document.getElementById("status");
@@ -338,8 +338,7 @@ function updateGhost(dt){
  // Outside its chase ability, the ghost continues moving independently and bouncing off walls.
  for(const u of opponents){
   if(ghost.damageCd<=0&&Math.abs(u.x-ghost.x)<ghost.size*.7&&Math.abs(u.y-ghost.y)<ghost.size*.7){
-   u.hp=Math.max(0,u.hp-120);
-   showDamage(u,120);
+   applyDamage(u,120);
    ghost.damageCd=0.5;
    break;
   }
@@ -437,7 +436,7 @@ function draw(){
  drawFloatingDamage();
 }
 function isGhostTransparent(){return activeUnits().some(u=>u!==ghost&&u.hp>0&&Math.abs(u.x-ghost.x)<(u.size+ghost.size)*.38&&Math.abs(u.y-ghost.y)<(u.size+ghost.size)*.38);}
-function applyDamage(target,amount){const actualDamage=Math.round(target===ghost&&isGhostTransparent()?amount*.8:amount);target.hp=Math.max(0,target.hp-actualDamage);showDamage(target,actualDamage);}
+function applyDamage(target,amount){const actualDamage=Math.round(target===ghost&&isGhostTransparent()?amount*.8:amount);target.hp=Math.max(0,target.hp-actualDamage);showDamage(target,actualDamage);playHurtSound(target);}
 function showDamage(target,amount){
  floatingDamage.push({x:target.x,y:target.y+target.size/2+18,amount,life:.85,maxLife:.85});
 }
