@@ -434,10 +434,10 @@ function draw(){
  drawFloatingDamage();
 }
 function showDamage(target,amount){
- floatingDamage.push({x:target.x,y:target.y-target.size/2-12,amount,life:.85,maxLife:.85});
+ floatingDamage.push({x:target.x,y:target.y+target.size/2+18,amount,life:.85,maxLife:.85});
 }
 function updateFloatingDamage(dt){
- for(const item of floatingDamage){item.life-=dt;item.y-=38*dt;}
+ for(const item of floatingDamage){item.life-=dt;item.y+=38*dt;}
  floatingDamage=floatingDamage.filter(item=>item.life>0);
 }
 function drawFloatingDamage(){
