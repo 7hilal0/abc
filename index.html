@@ -120,7 +120,7 @@ canvas{border:4px solid #596579;border-radius:0;box-shadow:none;background:#2029
     <p>⚡ السرعة: <strong id="statGhostSpeed">115</strong></p>
     <p>💥 الضرر: <strong>90 لكل لمسة</strong></p>
     <p>🎯 المدى: <strong>قريب جدًا — عند ملامسة الخصم تقريبًا</strong></p>
-    <p>✨ القدرة: <strong id="statGhostAbility">يطارد الخصم بسرعة 230 لمدة ثانيتين إذا اقترب ضمن 190 وحدة</strong></p>
+    <p>✨ القدرة: <strong id="statGhostAbility">يطارد الخصم بسرعة 230 لمدة ثانيتين إذا اقترب ضمن 190 وحدة • تتجدد كل 7 ثوانٍ</strong></p>
     <p>⏱️ وقت الهجوم: <strong>كل 0.5 ثانية عند التلامس</strong></p>
   </div>
 </div>
@@ -316,7 +316,7 @@ function updateGhost(dt){
   if(nearby){
    ghost.chaseTarget=nearby.unit;
    ghost.chaseTimer=2;
-   ghost.chaseCooldown=5;
+   ghost.chaseCooldown=7;
   }
  }
  if(ghost.chaseTimer>0&&ghost.chaseTarget&&ghost.chaseTarget.hp>0){
