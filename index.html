@@ -290,11 +290,17 @@ function updateGhost(dt){
  ghost.chaseCooldown=Math.max(0,ghost.chaseCooldown-dt);
  const r=ghost.size/2;
  const opponents=activeUnits().filter(v=>v!==ghost&&v.hp>0);
- // Ability: actively chase the opponent for 2 seconds, then recharge for 5 seconds.
+ // Only activate the 2-second chase when an opponent enters the ghost's 190px detection radius; cooldown is 5 seconds.
  if(ghost.chaseTimer<=0&&ghost.chaseCooldown<=0&&opponents.length){
-  ghost.chaseTarget=opponents[0];
-  ghost.chaseTimer=2;
-  ghost.chaseCooldown=5;
+  const nearby=opponents
+   .map(u=>({unit:u,distance:Math.hypot(u.x-ghost.x,u.y-ghost.y)}))
+   .filter(item=>item.distance<=190)
+   .sort((a,b)=>a.distance-b.distance)[0];
+  if(nearby){
+   ghost.chaseTarget=nearby.unit;
+   ghost.chaseTimer=2;
+   ghost.chaseCooldown=5;
+  }
  }
  if(ghost.chaseTimer>0&&ghost.chaseTarget&&ghost.chaseTarget.hp>0){
   ghost.chaseTimer=Math.max(0,ghost.chaseTimer-dt);
@@ -397,7 +403,7 @@ function updateUI(){
 }
  if(statGunSpeed)statGunSpeed.textContent=Math.round(Math.hypot(gun.vx,gun.vy));
  if(statGhostSpeed)statGhostSpeed.textContent=Math.round(Math.hypot(ghost.vx,ghost.vy));
- if(statGhostAbility)statGhostAbility.textContent=ghost.chaseTimer>0?"يطارد الخصم! "+ghost.chaseTimer.toFixed(1)+" ث":ghost.chaseCooldown>0?"إعادة شحن القدرة: "+ghost.chaseCooldown.toFixed(1)+" ث":"يطارد الخصم لمدة ثانيتين • جاهزة";
+ if(statGhostAbility)statGhostAbility.textContent=ghost.chaseTimer>0?"يطارد الخصم! "+ghost.chaseTimer.toFixed(1)+" ث":ghost.chaseCooldown>0?"إعادة الشحن: "+ghost.chaseCooldown.toFixed(1)+" ث":"يلحق بالخصم إذا اقترب ضمن 190 • جاهزة";
  if(statGunAmmo)statGunAmmo.textContent=gun.reload>0?"إعادة تعبئة "+gun.reload.toFixed(1)+" ث":gun.ammo+" / 4";
  if(statGunAbility)statGunAbility.textContent=gun.reload>0?"إعادة التعبئة جارية":"4 طلقات • كل 1.5 ث";
 }
